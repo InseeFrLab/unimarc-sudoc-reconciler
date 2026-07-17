@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: unimarc-sudoc-reconciler
+  # ⚠️ À ADAPTER : même namespace que le Deployment
+  namespace: user-mhillion
+  annotations:
+    # Timeout long pour les connexions SSE (suivi de progression).
+    # Sans ça, nginx couperait la connexion au bout de 60 s et la
+    # barre de progression se figerait pendant la vérification.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: unimarc-sudoc-reconciler.lab.sspcloud.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: unimarc-sudoc-reconciler
+                port: { number: 80 }

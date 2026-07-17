@@ -1,0 +1,32 @@
+# application.yaml — Ressource ArgoCD.
+#
+# Ce fichier dit à ArgoCD :
+#   "Surveille le dossier deploy/ du dépôt GitHub ci-dessous.
+#    Dès qu'un fichier YAML change, applique-le au cluster."
+#
+# C'est le SEUL fichier qu'on applique manuellement (une seule fois).
+# Ensuite, ArgoCD gère tout le reste automatiquement.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: unimarc-sudoc-reconciler
+  # ⚠️ À ADAPTER : même namespace que les autres fichiers
+  namespace: user-mhillion
+spec:
+  project: default
+  source:
+    # ⚠️ À ADAPTER : l'URL de TON dépôt GitHub
+    repoURL: https://github.com/inseefrlab/unimarc-sudoc-reconciler.git
+    targetRevision: main
+    path: deploy
+  destination:
+    server: https://kubernetes.default.svc
+    # ⚠️ À ADAPTER : même namespace
+    namespace: user-mhillion
+  syncPolicy:
+    automated:
+      # prune : supprime les objets du cluster si tu supprimes le YAML du dépôt
+      prune: true
+      # selfHeal : si quelqu'un modifie un objet à la main dans le cluster,
+      # ArgoCD le remet dans l'état décrit par le dépôt Git
+      selfHeal: true

@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────
+# build-push.yml — Automatisation GitHub Actions
+#
+# À chaque "push" sur la branche main, ce workflow :
+#   1. Récupère le code
+#   2. Se connecte au registre GitHub (ghcr.io)
+#   3. Construit l'image Docker (à partir du Dockerfile)
+#   4. La pousse sur ghcr.io/<votre-org>/<nom-du-repo>:latest
+#
+# C'est l'équivalent de faire "docker build + docker push" à la
+# main, mais de façon automatique et reproductible.
+# ─────────────────────────────────────────────────────────────
+name: Build & Push Docker Image
+
+# Déclencheur : un push sur la branche main.
+on:
+  push:
+    branches: [main]
+
+# Permissions nécessaires pour écrire dans le registre GitHub.
+permissions:
+  contents: read       # lire le code du dépôt
+  packages: write      # pousser l'image dans ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # Étape 1 : récupérer le code du dépôt.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Étape 2 : se connecter à ghcr.io avec le token automatique de GitHub.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Étape 3 : construire l'image et la pousser.
+      # L'image sera disponible à :
+      #   ghcr.io/<propriétaire-du-repo>/verificateur-syracuse-sudoc:latest
+      # Le tag "latest" est mis à jour à chaque push sur main.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
