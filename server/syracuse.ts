@@ -64,11 +64,25 @@ export const SYRACUSE_TO_UNIMARC: Record<string, { tag: string; code: string }> 
   "Prix": { tag: "010", code: "d" }
 };
 
+// Champs jamais comparés ni modifiés (administratifs ou structurels).
+// Liste alignée sur celle du front (src/App.tsx) et sur la spécification d'origine.
+// Seule exception : "Identifiant d'origine" est réécrit lors d'un rattachement SRU.
 export const UNMODIFIABLE_FIELDS = [
-  "Identifiant", "Identifiant d'origine", "Filtre", "Règle", 
-  "Nombre d'exemplaires", "Référence commerciale", "Référence éditoriale", 
-  "EAN (valeur)", "UPC", "Document", "Type de notice"
+  "Identifiant", "Identifiant d'origine", "Filtre", "Règle",
+  "Nombre d'exemplaires", "Référence commerciale", "Référence éditoriale",
+  "EAN (valeur)", "UPC", "Document", "Type de notice", "Agence de catalogage",
+  "Titre uniforme", "Titre : volume", "Titre de partie et N° de partie",
+  "Titre de série", "Tome", "Nom - Responsabiblité"
 ];
+
+// ─── Pseudo-champs ───────────────────────────────────────────────────────────
+// Certaines propositions ne correspondent à AUCUN champ Syracuse : elles ne
+// concernent que la notice UNIMARC destinée à WINIBW. On les fait circuler dans
+// la liste des écarts (pour que la documentaliste puisse les accepter ou les
+// refuser), mais elles ne doivent jamais être écrites dans le XML Syracuse.
+export const CHAMP_TYPE_SUPPORT = 'Type de support (183)';
+export const LIGNE_183_DEFAUT = '183 ##$P01$anga'; // volume imprimé, code RDA
+export const PSEUDO_UNIMARC_FIELDS = new Set<string>([CHAMP_TYPE_SUPPORT]);
 
 /**
  * Lit le contenu XML d'un export Syracuse et renvoie la liste des notices
@@ -76,7 +90,13 @@ export const UNMODIFIABLE_FIELDS = [
  * catégorie. Logique reprise à l'identique de la route /api/upload d'origine.
  */
 export function parseSyracuseNotices(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', preserveOrder: false });
+  // parseAttributeValue: false (défaut, rendu explicite) — sans quoi un
+  // "Identifiant d'origine" comme 065493583 serait converti en nombre et
+  // perdrait son zéro initial.
+  const parser = new XMLParser({
+    ignoreAttributes: false, attributeNamePrefix: '@_',
+    preserveOrder: false, parseAttributeValue: false, parseTagValue: false,
+  });
   const parsedXml = parser.parse(xmlString);
 
   // Le XML Syracuse imbrique les notices sous des noeuds "item" contenant des

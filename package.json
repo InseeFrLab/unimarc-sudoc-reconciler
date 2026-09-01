@@ -1,14 +1,15 @@
 {
-  "name": "verificateur-syracuse-sudoc",
+  "name": "unimarc-sudoc-reconciler",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.4.0",
   "type": "module",
   "description": "Vérifie et corrige les notices Syracuse en les comparant au catalogue Sudoc.",
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

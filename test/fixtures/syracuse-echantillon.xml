@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Export Syracuse de test (3 notices) : une rattachée au Sudoc (catégorie A),
+     deux notices PMB (catégorie B) dont une avec un identifiant à 8 chiffres,
+     forme d'un PPN amputé de son zéro initial. -->
+<items>
+  <item type="GESMARC">
+    <property name="Identifiant" value="SYR-001" rank="1" referentialType="" referentialName="" />
+    <property name="Identifiant d'origine" value="267670346" rank="2" referentialType="" referentialName="" />
+    <property name="Filtre" value="SUDOC" rank="3" referentialType="" referentialName="" />
+    <property name="Titre" value="Les comptes de la nation : édition 2022" rank="4" referentialType="" referentialName="" />
+    <property name="Auteur principal - Personne physique" value="Ledoux, Pierre (1932-2011) 026927438" rank="5" referentialType="Autorité" referentialName="Personnes" />
+    <property name="Editeur" value="INSEE" rank="6" referentialType="" referentialName="" />
+    <property name="Publié le" value="C 2022" rank="7" referentialType="" referentialName="" />
+    <property name="ISBN" value="9782111380808" rank="8" referentialType="" referentialName="" />
+    <property name="EAN" value="" rank="9" referentialType="" referentialName="" />
+    <property name="Description matérielle" value="1 vol. (151 p.) Tableaux 22 cm" rank="10" referentialType="" referentialName="" />
+    <property name="Résumé" value="" rank="11" referentialType="" referentialName="" />
+    <property name="Vedette matière - Nom commun" value="Comptabilité nationale France rameau" rank="12" referentialType="" referentialName="" />
+    <property name="Tome" value="2" rank="13" referentialType="" referentialName="" />
+    <property name="Nombre d'exemplaires" value="3" rank="14" referentialType="" referentialName="" />
+  </item>
+  <item type="GESMARC">
+    <property name="Identifiant" value="SYR-002" rank="1" referentialType="" referentialName="" />
+    <property name="Identifiant d'origine" value="65493583" rank="2" referentialType="" referentialName="" />
+    <property name="Filtre" value="PMB.BIB" rank="3" referentialType="" referentialName="" />
+    <property name="Titre" value="La comptabilité des entreprises en France" rank="4" referentialType="" referentialName="" />
+    <property name="Auteur principal - Personne physique" value="Martin, Paul" rank="5" referentialType="" referentialName="" />
+    <property name="Publié le" value="1965" rank="6" referentialType="" referentialName="" />
+  </item>
+  <item type="GESMARC">
+    <property name="Identifiant" value="SYR-003" rank="1" referentialType="" referentialName="" />
+    <property name="Identifiant d'origine" value="123456" rank="2" referentialType="" referentialName="" />
+    <property name="Filtre" value="PMB.BIB" rank="3" referentialType="" referentialName="" />
+    <property name="Titre" value="Le recensement de la population de 1954" rank="4" referentialType="" referentialName="" />
+    <property name="Publié le" value="1956" rank="5" referentialType="" referentialName="" />
+  </item>
+</items>

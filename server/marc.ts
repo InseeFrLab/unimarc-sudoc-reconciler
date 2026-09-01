@@ -13,9 +13,53 @@
 import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 
+/**
+ * Options de parsing des XML du Sudoc.
+ *
+ * `parseTagValue: false` est CRUCIAL : par défaut fast-xml-parser convertit
+ * "026927438" en nombre 26927438 et "070" en 70, ce qui détruit les zéros
+ * initiaux. C'est exactement ce qui tronquait les PPN de la zone 001 des
+ * réponses SRU et les IdRef de la sous-zone $3. Tout reste en chaîne.
+ */
+export const SUDOC_PARSER_OPTIONS = {
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  parseTagValue: false,
+  parseAttributeValue: false,
+} as const;
+
 // --- Constantes & utilitaires ---
 export const SUDOC_BASE_URL = 'https://www.sudoc.fr';
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Un PPN Sudoc fait TOUJOURS 9 caractères (8 chiffres + 1 caractère de
+ * contrôle, chiffre ou X). Le zéro initial est fréquemment perdu en route
+ * (identifiant stocké comme entier, réponse SRU tronquée...). Sans ce padding,
+ * https://www.sudoc.fr/{PPN}.xml répond 404.
+ * À appliquer sur TOUT PPN avant un appel réseau ou un affichage.
+ */
+export function padPpn(ppn: string | number | null | undefined): string {
+  if (ppn === null || ppn === undefined) return '';
+  const s = String(ppn).trim().toUpperCase();
+  if (/^[0-9]{7}[0-9X]$/.test(s)) return '0' + s; // 8 caractères -> 9
+  return s;
+}
+
+/** Le PPN a-t-il la forme attendue (une fois paddé) ? */
+export function isPpn(ppn: string | number | null | undefined): boolean {
+  return /^[0-9]{8}[0-9X]$/.test(padPpn(ppn));
+}
+
+/**
+ * L'identifiant ressemble-t-il à un PPN amputé de son zéro initial ?
+ * Attention : un identifiant PMB à 8 chiffres a exactement la même forme. On ne
+ * s'en sert donc JAMAIS pour classer une notice en catégorie A — seulement pour
+ * proposer un candidat que la documentaliste validera.
+ */
+export function looksLikeTruncatedPpn(id: string | number | null | undefined): boolean {
+  return /^[0-9]{7}[0-9X]$/.test(String(id ?? '').trim().toUpperCase());
+}
 
 // Mots vides ignorés lors de la construction d'une requête SRU.
 export const STOP_WORDS = new Set([
@@ -45,6 +89,117 @@ export function generateEanFromIsbn(isbn: string) {
   return '';
 }
 
+// --- Retrouver un PPN à partir d'un ISBN ou d'un EAN (services de l'ABES) ---
+/**
+ * Réponse type du service isbn2ppn / ean2ppn :
+ *   <sudoc><query><isbn>...</isbn><result><ppn>013955896</ppn></result></query></sudoc>
+ * Plusieurs <ppn> peuvent être renvoyés (plusieurs notices pour un même ISBN),
+ * et un <error> remplace le <result> quand rien n'est trouvé.
+ * Isolé de l'appel réseau pour être testable.
+ */
+export function parsePpn2Response(xmlString: string): string[] {
+  try {
+    const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
+    const parsed = parser.parse(String(xmlString));
+    const query = parsed?.sudoc?.query;
+    if (!query) return [];
+    const results = Array.isArray(query.result) ? query.result : (query.result ? [query.result] : []);
+    const ppns: string[] = [];
+    for (const r of results) {
+      const raw = r && typeof r === 'object' && 'ppn' in r ? (r as any).ppn : r;
+      const list = Array.isArray(raw) ? raw : [raw];
+      for (const item of list) {
+        const value = item && typeof item === 'object' ? (item['#text'] ?? '') : item;
+        const ppn = padPpn(value);
+        if (isPpn(ppn) && !ppns.includes(ppn)) ppns.push(ppn);
+      }
+    }
+    return ppns;
+  } catch {
+    return [];
+  }
+}
+
+async function ppnFromService(service: 'isbn2ppn' | 'ean2ppn', value: string): Promise<string[]> {
+  const clean = String(value ?? '').replace(/[^0-9Xx]/g, '');
+  if (!clean) return [];
+  try {
+    const response = await axios.get(`${SUDOC_BASE_URL}/services/${service}/${clean}`, { timeout: 15000 });
+    return parsePpn2Response(response.data);
+  } catch {
+    return []; // service muet ou ISBN inconnu : on reste silencieux, c'est un secours
+  }
+}
+
+/** PPN(s) correspondant à un ISBN. Tableau vide si rien trouvé. */
+export const ppnFromIsbn = (isbn: string) => ppnFromService('isbn2ppn', isbn);
+/** PPN(s) correspondant à un EAN. Tableau vide si rien trouvé. */
+export const ppnFromEan = (ean: string) => ppnFromService('ean2ppn', ean);
+
+// --- Mentions d'illustrations (215 $c) ---
+// Vocabulaire de la description matérielle. Le plus long d'abord : "couv. ill."
+// doit être reconnu avant "ill.".
+export const ILLUSTRATION_TERMS = [
+  'couv. ill. en coul.', 'couv. ill.', 'ill. en coul.', 'illustrations en couleur',
+  'illustrations', 'ill.', 'photogr.', 'photographies', 'portr.', 'portraits',
+  'diagrammes', 'graphiques', 'graph.', 'tableaux', 'tabl.', 'figures', 'fig.',
+  'schémas', 'planches', 'pl.', 'cartes', 'carte', 'fac-sim.', 'couv. en coul.',
+];
+
+// Deux normalisations distinctes :
+//  - canonPos  : accents et casse seulement, donc MÊME longueur que la source
+//                (indispensable pour retrouver la graphie d'origine par index) ;
+//  - canonKey  : en plus, espaces réduits — sert à comparer deux mentions.
+const canonPos = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const canonKey = (s: string) => canonPos(s).replace(/\s+/g, ' ').trim();
+
+/**
+ * Repère les mentions d'illustrations présentes dans un texte de collation.
+ * Renvoie les libellés tels qu'ils apparaissent dans le texte (on préserve la
+ * graphie du catalogueur), sans doublon.
+ */
+export function extractIllustrationMentions(text: string): string[] {
+  const source = String(text ?? '');
+  if (!source.trim()) return [];
+  let masque = canonPos(source);
+  const trouves: string[] = [];
+  for (const term of ILLUSTRATION_TERMS) {
+    const c = canonPos(term);
+    const idx = masque.indexOf(c);
+    if (idx === -1) continue;
+    // canonPos conserve les longueurs : la graphie d'origine est au même index.
+    const original = source.slice(idx, idx + c.length).trim();
+    trouves.push(original || term);
+    // Masquer la zone reconnue pour ne pas re-matcher un terme plus court dedans.
+    masque = masque.slice(0, idx) + '\u0000'.repeat(c.length) + masque.slice(idx + c.length);
+  }
+  return trouves;
+}
+
+/**
+ * Fusion des mentions d'illustrations Syracuse + Sudoc (§4bis.5 de la spec).
+ * Le Sudoc d'abord, puis les mentions que seule Syracuse porte. Renvoie null
+ * s'il n'y a rien à ajouter — auquel cas la comparaison classique s'applique.
+ */
+export function buildFusedCollation(
+  collation: { a?: string; c?: string; d?: string } | null | undefined,
+  valeurSyracuse: string,
+): { value: string; added: string[]; subfields: { a: string; c: string; d: string } } | null {
+  if (!collation) return null;
+  const mentionsSudoc = extractIllustrationMentions(collation.c || '');
+  const mentionsSyracuse = extractIllustrationMentions(valeurSyracuse);
+  const dejaLa = new Set(mentionsSudoc.map(canonKey));
+  const added = mentionsSyracuse.filter((m) => !dejaLa.has(canonKey(m)));
+  if (added.length === 0) return null;
+  const c = [collation.c || '', ...added].filter(Boolean).join(', ');
+  const a = normalizeDescription(collation.a || '');
+  const d = collation.d || '';
+  // `value` sert à l'affichage et au XML Syracuse (champ plat) ; `subfields`
+  // sert à réécrire proprement la zone 215 dans l'export UNIMARC, sans quoi la
+  // collation entière atterrirait dans $a et $c ferait doublon.
+  return { value: [a, c, d].filter(Boolean).join(' '), added, subfields: { a, c, d } };
+}
+
 // --- Parsing d'une notice UNIMARC Sudoc en objet structuré ---
 export function parseSudocRecord(record: any) {
   if (!record) return null;
@@ -69,7 +224,8 @@ export function parseSudocRecord(record: any) {
     result.isbn = getSubfield(zone010, 'a') || '';
     result.prix = getSubfield(zone010, 'd') || '';
     let reliure = getSubfield(zone010, 'b') || '';
-    reliure = reliure.replace(/\bbr\.\b/gi, 'broché').replace(/\brel\.\b/gi, 'relié');
+    // Pas de \b après le point : "br." en fin de chaîne ne matcherait jamais.
+    reliure = reliure.replace(/\bbr\./gi, 'broché').replace(/\brel\./gi, 'relié');
     result.reliure = reliure;
   }
   const zone073 = findDatafield('073');
@@ -94,6 +250,9 @@ export function parseSudocRecord(record: any) {
     const d = getSubfield(zone215, 'd') || '';
     const normalizedA = normalizeDescription(a);
     result.descriptionMaterielle = [normalizedA, c, d].filter(Boolean).join(' ');
+    // Sous-zones conservées séparément : la fusion des illustrations (215 $c)
+    // a besoin du découpage, que la chaîne concaténée ci-dessus perd.
+    result.collation215 = { a, c, d };
   }
   const zones225 = findAllDatafields('225');
   result.collection = zones225.map((z: any) => getSubfield(z, 'a')).filter(Boolean).join(' ; ');
@@ -144,14 +303,14 @@ export function parseSudocRecord(record: any) {
 }
 
 export function parseSudocXml(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const parsed = parser.parse(xmlString);
   return parseSudocRecord(parsed.record);
 }
 
 // --- Recherche SRU dans le Sudoc ---
 export function parseSruResponse(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const data = parser.parse(xmlString);
   const root = data['srw:searchRetrieveResponse'];
   const count = parseInt(root?.['srw:numberOfRecords'] || '0');
@@ -171,7 +330,8 @@ export function parseSruResponse(xmlString: string) {
       }
     }
     const parsedRecord = parseSudocRecord(record);
-    return { ppn: String(ppn).trim(), ...parsedRecord };
+    // Le SRU renvoie parfois le PPN amputé de son zéro initial.
+    return { ppn: padPpn(ppn), ...parsedRecord };
   }).filter(Boolean);
   return { count, candidates };
 }
@@ -180,7 +340,9 @@ export function buildSruQuery(notice: any) {
   const titre = notice['Titre'] || '';
   const auteurPP = notice['Auteur principal - Personne physique'] || '';
   const auteurColl = notice['Auteur principal - Collectivité '] || '';
-  const annee = notice['Publié le'] || '';
+  // Année « exacte » : le champ Syracuse peut contenir « C 2022 » (copyright) ou
+  // « 2022, cop. 2021 ». Le SRU attend 4 chiffres et rien d'autre.
+  const annee = (String(notice['Publié le'] || '').match(/\d{4}/) || [''])[0];
   const motsTitre = titre
     .replace(/[:\-\.,;!?'"()]/g, ' ')
     .split(/\s+/)
@@ -215,7 +377,9 @@ export async function searchSru(motsTitre: string, nomAuteur: string, annee: str
 }
 
 // --- Récupération d'une notice Sudoc par PPN (gère les PPN fusionnés) ---
-export async function fetchSudocRecord(ppn: string): Promise<string | null> {
+export async function fetchSudocRecord(ppnBrut: string): Promise<string | null> {
+  const ppn = padPpn(ppnBrut); // 8 caractères -> 9, sinon 404 garanti
+  if (!ppn) return null;
   try {
     const response = await axios.get(`${SUDOC_BASE_URL}/${ppn}.xml`, { timeout: 15000 });
     return response.data;
@@ -224,10 +388,11 @@ export async function fetchSudocRecord(ppn: string): Promise<string | null> {
       try {
         const mergedResponse = await axios.get(`${SUDOC_BASE_URL}/services/merged/${ppn}`, { timeout: 15000 });
         const mergedXml = mergedResponse.data;
-        const parser = new XMLParser();
+        const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
         const parsedMerged = parser.parse(mergedXml);
         if (parsedMerged.sudoc && parsedMerged.sudoc.query && parsedMerged.sudoc.query.result && parsedMerged.sudoc.query.result.ppn) {
            const newPpn = parsedMerged.sudoc.query.result.ppn;
+           if (padPpn(newPpn) === ppn) return null; // garde-fou anti-boucle
            return await fetchSudocRecord(newPpn);
         }
       } catch (e) { /* ignore */ }
@@ -237,30 +402,27 @@ export async function fetchSudocRecord(ppn: string): Promise<string | null> {
 }
 
 // --- Conversion UNIMARC XML -> texte WINIBW (export .txt) ---
+// Zones absentes de l'export WINIBW : techniques, de gestion, ou déjà présentes
+// dans la notice Sudoc que l'on vient corriger (000 leader, 008 type de notice).
 export const EXCLUDED_TAGS = new Set(['000', '004', '005', '006', '007', '008', '020', '579', '676', '680', '686', '801', '931', '990', '992']);
 export const HOLDINGS_TAGS = new Set(['915', '917', '930', '940', '941', '991', '999']);
 
 export function unimarcXmlToText(xmlString: string): string {
-  const parser = new XMLParser({ 
-    ignoreAttributes: false, 
-    attributeNamePrefix: '@_',
-    // Important : préserver l'ordre des datafields tels qu'ils apparaissent dans le XML
-  });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const parsed = parser.parse(xmlString);
   const record = parsed.record;
   if (!record) return '';
   
   const lines: string[] = [];
-  
-  // 1. Leader (zone 000) — facultatif, présent dans certaines notices
-  if (record.leader && !EXCLUDED_TAGS.has('000')) {
-    const leaderText = typeof record.leader === 'string' 
-      ? record.leader 
-      : (record.leader['#text'] || '');
-    if (leaderText) lines.push(`000 $0${leaderText}`);
-  }
-  
-  // 2. Controlfields (zones 001, 003, 005, 008, etc.) — pas d'indicateurs ni de subfields
+
+  // 1. Le leader (000) et la zone 008 ne sont PAS exportés — décision assumée :
+  //    ce fichier sert à corriger dans WINIBW une notice Sudoc qui existe déjà
+  //    (elle vient du Sudoc), pas à en créer une de zéro. Ces deux zones y sont
+  //    donc déjà, et les recopier n'apporterait que du bruit à coller.
+  //    Si le besoin de créer des notices apparaît : retirer '000' et '008' de
+  //    EXCLUDED_TAGS et rétablir leur mise en forme (000 $0…, 008 $a…).
+
+  // 2. Controlfields (001, 003, ...) — pas d'indicateurs ni de sous-zones
   let controlfields = record.controlfield;
   if (controlfields) {
     if (!Array.isArray(controlfields)) controlfields = [controlfields];
@@ -269,14 +431,7 @@ export function unimarcXmlToText(xmlString: string): string {
       if (EXCLUDED_TAGS.has(tag)) continue;
       
       const value = (cf['#text'] !== undefined ? String(cf['#text']) : String(cf || '')).trim();
-      if (tag && value) {
-        // Format spécifique : 008 a un préfixe $a, les autres non
-        if (tag === '008') {
-          lines.push(`${tag} $a${value}`);
-        } else {
-          lines.push(`${tag} ${value}`);
-        }
-      }
+      if (tag && value) lines.push(`${tag} ${value}`);
     }
   }
   
@@ -288,11 +443,16 @@ export function unimarcXmlToText(xmlString: string): string {
       const tag = df['@_tag'] || '';
       if (HOLDINGS_TAGS.has(tag) || EXCLUDED_TAGS.has(tag)) continue;  // filtrer les zones d'exemplaires et exclues
 
-      const ind1 = df['@_ind1'] !== undefined ? String(df['@_ind1']) : ' ';
-      const ind2 = df['@_ind2'] !== undefined ? String(df['@_ind2']) : ' ';
-      
-      // Convertir les espaces des indicateurs en '#' pour la lisibilité
-      const indStr = (ind1 === ' ' ? '#' : ind1) + (ind2 === ' ' ? '#' : ind2);
+      // Indicateurs : WINIBW en attend TOUJOURS deux caractères, '#' tenant lieu
+      // d'espace. Attention : le parser XML trime les attributs, donc ind1=" "
+      // arrive ici sous la forme d'une chaîne vide — la tester contre ' ' seul
+      // laissait passer des lignes malformées du type "010 $a..." au lieu de
+      // "010 ##$a...".
+      const indicateur = (v: any) => {
+        const s = v === undefined || v === null ? '' : String(v);
+        return s.trim() === '' ? '#' : s.trim();
+      };
+      const indStr = indicateur(df['@_ind1']) + indicateur(df['@_ind2']);
       
       // Extraire les subfields
       let subfields = df.subfield;
