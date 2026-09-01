@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 import { sessions } from './sessions.ts';
 import { parseSyracuseNotices, detectCategory, SYRACUSE_MAPPING } from './syracuse.ts';
-import { fetchSudocRecord, parseSudocXml, searchSru, delay } from './marc.ts';
+import { fetchSudocRecord, padPpn, parseSudocXml, searchSru, delay } from './marc.ts';
 import { compareNoticeWithSudoc } from './compare.ts';
 import { verifyNotice } from './verify.ts';
 import { buildXmlExport, buildCsvExport, buildTxtExport } from './exports.ts';
@@ -173,8 +173,9 @@ app.post('/api/results/:sessionId/:identifiant/valider', async (req, res) => {
 // ─── Rattachement manuel d'un PPN à une notice de catégorie B ───
 app.post('/api/results/:sessionId/:identifiant/rattacher', async (req, res) => {
   const { sessionId, identifiant } = req.params;
-  const { nouveauPpn } = req.body;
+  const nouveauPpn = padPpn(req.body?.nouveauPpn); // 9 caractères, toujours
   try {
+    if (!nouveauPpn) return res.status(400).json({ error: 'PPN manquant' });
     const sudocXml = await fetchSudocRecord(nouveauPpn);
     if (!sudocXml) return res.status(404).json({ error: 'Notice Sudoc non trouvée' });
     const sudocData = parseSudocXml(sudocXml);

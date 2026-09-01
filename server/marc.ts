@@ -13,9 +13,53 @@
 import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 
+/**
+ * Options de parsing des XML du Sudoc.
+ *
+ * `parseTagValue: false` est CRUCIAL : par défaut fast-xml-parser convertit
+ * "026927438" en nombre 26927438 et "070" en 70, ce qui détruit les zéros
+ * initiaux. C'est exactement ce qui tronquait les PPN de la zone 001 des
+ * réponses SRU et les IdRef de la sous-zone $3. Tout reste en chaîne.
+ */
+export const SUDOC_PARSER_OPTIONS = {
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  parseTagValue: false,
+  parseAttributeValue: false,
+} as const;
+
 // --- Constantes & utilitaires ---
 export const SUDOC_BASE_URL = 'https://www.sudoc.fr';
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Un PPN Sudoc fait TOUJOURS 9 caractères (8 chiffres + 1 caractère de
+ * contrôle, chiffre ou X). Le zéro initial est fréquemment perdu en route
+ * (identifiant stocké comme entier, réponse SRU tronquée...). Sans ce padding,
+ * https://www.sudoc.fr/{PPN}.xml répond 404.
+ * À appliquer sur TOUT PPN avant un appel réseau ou un affichage.
+ */
+export function padPpn(ppn: string | number | null | undefined): string {
+  if (ppn === null || ppn === undefined) return '';
+  const s = String(ppn).trim().toUpperCase();
+  if (/^[0-9]{7}[0-9X]$/.test(s)) return '0' + s; // 8 caractères -> 9
+  return s;
+}
+
+/** Le PPN a-t-il la forme attendue (une fois paddé) ? */
+export function isPpn(ppn: string | number | null | undefined): boolean {
+  return /^[0-9]{8}[0-9X]$/.test(padPpn(ppn));
+}
+
+/**
+ * L'identifiant ressemble-t-il à un PPN amputé de son zéro initial ?
+ * Attention : un identifiant PMB à 8 chiffres a exactement la même forme. On ne
+ * s'en sert donc JAMAIS pour classer une notice en catégorie A — seulement pour
+ * proposer un candidat que la documentaliste validera.
+ */
+export function looksLikeTruncatedPpn(id: string | number | null | undefined): boolean {
+  return /^[0-9]{7}[0-9X]$/.test(String(id ?? '').trim().toUpperCase());
+}
 
 // Mots vides ignorés lors de la construction d'une requête SRU.
 export const STOP_WORDS = new Set([
@@ -144,14 +188,14 @@ export function parseSudocRecord(record: any) {
 }
 
 export function parseSudocXml(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const parsed = parser.parse(xmlString);
   return parseSudocRecord(parsed.record);
 }
 
 // --- Recherche SRU dans le Sudoc ---
 export function parseSruResponse(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const data = parser.parse(xmlString);
   const root = data['srw:searchRetrieveResponse'];
   const count = parseInt(root?.['srw:numberOfRecords'] || '0');
@@ -171,7 +215,8 @@ export function parseSruResponse(xmlString: string) {
       }
     }
     const parsedRecord = parseSudocRecord(record);
-    return { ppn: String(ppn).trim(), ...parsedRecord };
+    // Le SRU renvoie parfois le PPN amputé de son zéro initial.
+    return { ppn: padPpn(ppn), ...parsedRecord };
   }).filter(Boolean);
   return { count, candidates };
 }
@@ -215,7 +260,9 @@ export async function searchSru(motsTitre: string, nomAuteur: string, annee: str
 }
 
 // --- Récupération d'une notice Sudoc par PPN (gère les PPN fusionnés) ---
-export async function fetchSudocRecord(ppn: string): Promise<string | null> {
+export async function fetchSudocRecord(ppnBrut: string): Promise<string | null> {
+  const ppn = padPpn(ppnBrut); // 8 caractères -> 9, sinon 404 garanti
+  if (!ppn) return null;
   try {
     const response = await axios.get(`${SUDOC_BASE_URL}/${ppn}.xml`, { timeout: 15000 });
     return response.data;
@@ -224,10 +271,11 @@ export async function fetchSudocRecord(ppn: string): Promise<string | null> {
       try {
         const mergedResponse = await axios.get(`${SUDOC_BASE_URL}/services/merged/${ppn}`, { timeout: 15000 });
         const mergedXml = mergedResponse.data;
-        const parser = new XMLParser();
+        const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
         const parsedMerged = parser.parse(mergedXml);
         if (parsedMerged.sudoc && parsedMerged.sudoc.query && parsedMerged.sudoc.query.result && parsedMerged.sudoc.query.result.ppn) {
            const newPpn = parsedMerged.sudoc.query.result.ppn;
+           if (padPpn(newPpn) === ppn) return null; // garde-fou anti-boucle
            return await fetchSudocRecord(newPpn);
         }
       } catch (e) { /* ignore */ }
@@ -241,11 +289,7 @@ export const EXCLUDED_TAGS = new Set(['000', '004', '005', '006', '007', '008', 
 export const HOLDINGS_TAGS = new Set(['915', '917', '930', '940', '941', '991', '999']);
 
 export function unimarcXmlToText(xmlString: string): string {
-  const parser = new XMLParser({ 
-    ignoreAttributes: false, 
-    attributeNamePrefix: '@_',
-    // Important : préserver l'ordre des datafields tels qu'ils apparaissent dans le XML
-  });
+  const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
   const parsed = parser.parse(xmlString);
   const record = parsed.record;
   if (!record) return '';

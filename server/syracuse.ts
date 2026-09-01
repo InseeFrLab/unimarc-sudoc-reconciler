@@ -76,7 +76,13 @@ export const UNMODIFIABLE_FIELDS = [
  * catégorie. Logique reprise à l'identique de la route /api/upload d'origine.
  */
 export function parseSyracuseNotices(xmlString: string) {
-  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', preserveOrder: false });
+  // parseAttributeValue: false (défaut, rendu explicite) — sans quoi un
+  // "Identifiant d'origine" comme 065493583 serait converti en nombre et
+  // perdrait son zéro initial.
+  const parser = new XMLParser({
+    ignoreAttributes: false, attributeNamePrefix: '@_',
+    preserveOrder: false, parseAttributeValue: false, parseTagValue: false,
+  });
   const parsedXml = parser.parse(xmlString);
 
   // Le XML Syracuse imbrique les notices sous des noeuds "item" contenant des
