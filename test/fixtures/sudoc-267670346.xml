@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Notice UNIMARC de test, construite à la main d'après la structure réelle du
+     webservice https://www.sudoc.fr/{PPN}.xml. Contient volontairement :
+       - une zone 100 au format UNIMARC standard (chaîne de 36 caractères)
+       - un 215 avec $a abrégé et une mention d'illustration en $c
+       - un 700 avec IdRef en $3
+       - pas de 073 (l'EAN devra être généré depuis l'ISBN)
+       - pas de 183 (le type de support devra être proposé)
+       - une zone d'exemplaire 915 (doit être filtrée à l'export)
+       - un 008 et un leader (volontairement absents de l'export WINIBW) -->
+<record>
+  <leader>cam0 22        450 </leader>
+  <controlfield tag="001">267670346</controlfield>
+  <controlfield tag="003">http://www.sudoc.fr/267670346</controlfield>
+  <controlfield tag="005">20230214120000.0</controlfield>
+  <controlfield tag="008">Aax3</controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">978-2-11-138080-8</subfield>
+    <subfield code="b">br.</subfield>
+    <subfield code="d">22 EUR</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20230214h20222022k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="200" ind1="1" ind2=" ">
+    <subfield code="a">Les comptes de la nation</subfield>
+    <subfield code="e">édition 2022</subfield>
+  </datafield>
+  <datafield tag="214" ind1=" " ind2="0">
+    <subfield code="c">Insee</subfield>
+    <subfield code="d">2022</subfield>
+  </datafield>
+  <datafield tag="215" ind1=" " ind2=" ">
+    <subfield code="a">1 vol. (151 p.)</subfield>
+    <subfield code="c">ill.</subfield>
+    <subfield code="d">22 cm</subfield>
+  </datafield>
+  <datafield tag="225" ind1="2" ind2=" ">
+    <subfield code="a">Insee références</subfield>
+  </datafield>
+  <datafield tag="330" ind1=" " ind2=" ">
+    <subfield code="a">Synthèse annuelle des comptes nationaux.</subfield>
+  </datafield>
+  <datafield tag="606" ind1=" " ind2=" ">
+    <subfield code="a">Comptabilité nationale</subfield>
+    <subfield code="x">France</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2="1">
+    <subfield code="a">Ledoux</subfield>
+    <subfield code="b">Pierre</subfield>
+    <subfield code="f">1932-2011</subfield>
+    <subfield code="3">026927438</subfield>
+    <subfield code="4">070</subfield>
+  </datafield>
+  <datafield tag="915" ind1=" " ind2=" ">
+    <subfield code="a">Bibliothèque universitaire de Rouen</subfield>
+  </datafield>
+</record>
