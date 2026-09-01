@@ -136,6 +136,70 @@ export const ppnFromIsbn = (isbn: string) => ppnFromService('isbn2ppn', isbn);
 /** PPN(s) correspondant à un EAN. Tableau vide si rien trouvé. */
 export const ppnFromEan = (ean: string) => ppnFromService('ean2ppn', ean);
 
+// --- Mentions d'illustrations (215 $c) ---
+// Vocabulaire de la description matérielle. Le plus long d'abord : "couv. ill."
+// doit être reconnu avant "ill.".
+export const ILLUSTRATION_TERMS = [
+  'couv. ill. en coul.', 'couv. ill.', 'ill. en coul.', 'illustrations en couleur',
+  'illustrations', 'ill.', 'photogr.', 'photographies', 'portr.', 'portraits',
+  'diagrammes', 'graphiques', 'graph.', 'tableaux', 'tabl.', 'figures', 'fig.',
+  'schémas', 'planches', 'pl.', 'cartes', 'carte', 'fac-sim.', 'couv. en coul.',
+];
+
+// Deux normalisations distinctes :
+//  - canonPos  : accents et casse seulement, donc MÊME longueur que la source
+//                (indispensable pour retrouver la graphie d'origine par index) ;
+//  - canonKey  : en plus, espaces réduits — sert à comparer deux mentions.
+const canonPos = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const canonKey = (s: string) => canonPos(s).replace(/\s+/g, ' ').trim();
+
+/**
+ * Repère les mentions d'illustrations présentes dans un texte de collation.
+ * Renvoie les libellés tels qu'ils apparaissent dans le texte (on préserve la
+ * graphie du catalogueur), sans doublon.
+ */
+export function extractIllustrationMentions(text: string): string[] {
+  const source = String(text ?? '');
+  if (!source.trim()) return [];
+  let masque = canonPos(source);
+  const trouves: string[] = [];
+  for (const term of ILLUSTRATION_TERMS) {
+    const c = canonPos(term);
+    const idx = masque.indexOf(c);
+    if (idx === -1) continue;
+    // canonPos conserve les longueurs : la graphie d'origine est au même index.
+    const original = source.slice(idx, idx + c.length).trim();
+    trouves.push(original || term);
+    // Masquer la zone reconnue pour ne pas re-matcher un terme plus court dedans.
+    masque = masque.slice(0, idx) + '\u0000'.repeat(c.length) + masque.slice(idx + c.length);
+  }
+  return trouves;
+}
+
+/**
+ * Fusion des mentions d'illustrations Syracuse + Sudoc (§4bis.5 de la spec).
+ * Le Sudoc d'abord, puis les mentions que seule Syracuse porte. Renvoie null
+ * s'il n'y a rien à ajouter — auquel cas la comparaison classique s'applique.
+ */
+export function buildFusedCollation(
+  collation: { a?: string; c?: string; d?: string } | null | undefined,
+  valeurSyracuse: string,
+): { value: string; added: string[]; subfields: { a: string; c: string; d: string } } | null {
+  if (!collation) return null;
+  const mentionsSudoc = extractIllustrationMentions(collation.c || '');
+  const mentionsSyracuse = extractIllustrationMentions(valeurSyracuse);
+  const dejaLa = new Set(mentionsSudoc.map(canonKey));
+  const added = mentionsSyracuse.filter((m) => !dejaLa.has(canonKey(m)));
+  if (added.length === 0) return null;
+  const c = [collation.c || '', ...added].filter(Boolean).join(', ');
+  const a = normalizeDescription(collation.a || '');
+  const d = collation.d || '';
+  // `value` sert à l'affichage et au XML Syracuse (champ plat) ; `subfields`
+  // sert à réécrire proprement la zone 215 dans l'export UNIMARC, sans quoi la
+  // collation entière atterrirait dans $a et $c ferait doublon.
+  return { value: [a, c, d].filter(Boolean).join(' '), added, subfields: { a, c, d } };
+}
+
 // --- Parsing d'une notice UNIMARC Sudoc en objet structuré ---
 export function parseSudocRecord(record: any) {
   if (!record) return null;
@@ -186,6 +250,9 @@ export function parseSudocRecord(record: any) {
     const d = getSubfield(zone215, 'd') || '';
     const normalizedA = normalizeDescription(a);
     result.descriptionMaterielle = [normalizedA, c, d].filter(Boolean).join(' ');
+    // Sous-zones conservées séparément : la fusion des illustrations (215 $c)
+    // a besoin du découpage, que la chaîne concaténée ci-dessus perd.
+    result.collation215 = { a, c, d };
   }
   const zones225 = findAllDatafields('225');
   result.collection = zones225.map((z: any) => getSubfield(z, 'a')).filter(Boolean).join(' ; ');

@@ -261,7 +261,7 @@ app.post('/api/results/:sessionId/bulk-action', (req, res) => {
     if (result) {
       if (result.categorie === 'B' && action === 'TOUT_ACCEPTER' && result.sudoc) {
         for (const [k, v] of Object.entries(result.sudoc)) {
-          if (['ppn', 'recordData', 'raw', 'hasTypeSupport', 'eanGenerated'].includes(k)) continue;
+          if (['ppn', 'recordData', 'raw', 'hasTypeSupport', 'eanGenerated', 'collation215'].includes(k)) continue;
           const sv = String(v ?? '').trim();
           if (!sv) continue;
           // Trouver le nom Syracuse correspondant

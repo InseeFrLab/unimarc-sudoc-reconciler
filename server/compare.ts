@@ -7,8 +7,8 @@
  * éditeur) sont repris tels quels du POC.
  */
 import stringSimilarity from 'string-similarity';
-import { SYRACUSE_MAPPING, UNMODIFIABLE_FIELDS } from './syracuse.ts';
-import { normalizeDescription } from './marc.ts';
+import { CHAMP_TYPE_SUPPORT, LIGNE_183_DEFAUT, SYRACUSE_MAPPING, UNMODIFIABLE_FIELDS } from './syracuse.ts';
+import { buildFusedCollation, normalizeDescription } from './marc.ts';
 
 export function normalizeString(str: string) {
   if (!str) return '';
@@ -105,11 +105,19 @@ export function compareNoticeWithSudoc(properties: any[], sudocData: any) {
     const sudocKey = SYRACUSE_MAPPING[champName];
     let valSudoc = sudocKey && sudocData && sudocData[sudocKey] !== undefined && sudocData[sudocKey] !== null ? String(sudocData[sudocKey]) : '';
     let statut = '', action = 'CONSERVER';
+    let unimarc: { tag: string; subfields: Record<string, string> } | undefined;
     if (champName === 'EAN' && !valSyracuse && sudocData?.eanGenerated) {
       statut = 'GENERE_AUTO'; action = 'ACCEPTER'; valSudoc = sudocData.ean;
     } else if (champName === 'Description matérielle') {
       const normSyracuse = normalizeDescription(valSyracuse);
+      // Fusion des mentions d'illustrations : Syracuse en porte parfois que le
+      // Sudoc ignore (« Tableaux »). On propose l'union plutôt que d'écraser.
+      const fusion = valSyracuse ? buildFusedCollation(sudocData?.collation215, valSyracuse) : null;
       if (!valSyracuse && valSudoc) { statut = 'MANQUANT_SYRACUSE'; }
+      else if (fusion) {
+        statut = 'FUSION'; action = 'ACCEPTER'; valSudoc = fusion.value;
+        unimarc = { tag: '215', subfields: fusion.subfields };
+      }
       else if (valSyracuse && normSyracuse !== valSyracuse) {
         statut = 'NORMALISE'; action = 'ACCEPTER'; valSudoc = normSyracuse;
       } else { statut = compareFields(champName, valSyracuse, valSudoc).statut; }
@@ -119,7 +127,20 @@ export function compareNoticeWithSudoc(properties: any[], sudocData: any) {
     if (statut === 'ERREUR') nbErreurs++;
     if (statut === 'MANQUANT_SYRACUSE') nbComplements++;
     if (statut === 'DIFFERENCE_MINEURE') nbMineures++;
-    ecarts.push({ champ: champName, valeurSyracuse: valSyracuse, valeurSudoc: valSudoc, statut, action });
+    ecarts.push({
+      champ: champName, valeurSyracuse: valSyracuse, valeurSudoc: valSudoc, statut, action,
+      ...(unimarc ? { unimarc } : {}),
+    });
+  }
+  // Proposition de zone 183 (type de support matériel) quand la notice Sudoc n'en
+  // a pas. Pseudo-champ : il ne concerne que l'export UNIMARC, jamais le XML
+  // Syracuse. Non compté dans les compteurs, comme l'EAN généré : c'est une
+  // proposition technique, pas un écart entre les deux catalogues.
+  if (sudocData && sudocData.hasTypeSupport === false) {
+    ecarts.push({
+      champ: CHAMP_TYPE_SUPPORT, valeurSyracuse: '', valeurSudoc: LIGNE_183_DEFAUT,
+      statut: 'GENERE_AUTO', action: 'ACCEPTER',
+    });
   }
   return { ecarts, nbErreurs, nbComplements, nbMineures };
 }

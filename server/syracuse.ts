@@ -70,6 +70,15 @@ export const UNMODIFIABLE_FIELDS = [
   "EAN (valeur)", "UPC", "Document", "Type de notice"
 ];
 
+// ─── Pseudo-champs ───────────────────────────────────────────────────────────
+// Certaines propositions ne correspondent à AUCUN champ Syracuse : elles ne
+// concernent que la notice UNIMARC destinée à WINIBW. On les fait circuler dans
+// la liste des écarts (pour que la documentaliste puisse les accepter ou les
+// refuser), mais elles ne doivent jamais être écrites dans le XML Syracuse.
+export const CHAMP_TYPE_SUPPORT = 'Type de support (183)';
+export const LIGNE_183_DEFAUT = '183 ##$P01$anga'; // volume imprimé, code RDA
+export const PSEUDO_UNIMARC_FIELDS = new Set<string>([CHAMP_TYPE_SUPPORT]);
+
 /**
  * Lit le contenu XML d'un export Syracuse et renvoie la liste des notices
  * exploitables (celles possédant un "Identifiant"), plus le décompte par

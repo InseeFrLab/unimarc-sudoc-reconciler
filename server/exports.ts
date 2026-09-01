@@ -12,7 +12,7 @@
  */
 import type { Session } from './sessions.ts';
 import { fetchSudocRecord, unimarcXmlToText } from './marc.ts';
-import { SYRACUSE_TO_UNIMARC } from './syracuse.ts';
+import { CHAMP_TYPE_SUPPORT, LIGNE_183_DEFAUT, PSEUDO_UNIMARC_FIELDS, SYRACUSE_TO_UNIMARC } from './syracuse.ts';
 
 export function buildXmlExport(session: Session): string {
   // Fonction d'échappement XML
@@ -76,6 +76,10 @@ export function buildXmlExport(session: Session): string {
     if (result && Array.isArray(result.ecarts)) {
       const existingNames = new Set(properties.map((p: any) => p['@_name']));
       for (const ecart of result.ecarts) {
+        // Les pseudo-champs (ex. « Type de support (183) ») ne concernent que la
+        // notice UNIMARC : les écrire ici créerait une propriété inconnue de
+        // Syracuse et ferait échouer le réimport.
+        if (PSEUDO_UNIMARC_FIELDS.has(ecart.champ)) continue;
         if (!existingNames.has(ecart.champ) && 
             (ecart.action === 'ACCEPTER' || ecart.action === 'MODIFIER')) {
           const newVal = ecart.action === 'MODIFIER' 
@@ -167,6 +171,25 @@ export async function buildTxtExport(session: Session): Promise<string> {
             : (ecart.valeurSudoc || '');
           if (!newValue) continue;
           
+          // Écart portant ses propres sous-zones (fusion de la collation 215) :
+          // on réécrit la zone complète, sinon la valeur concaténée irait dans $a
+          // et laisserait $c en doublon.
+          if (ecart.unimarc && ecart.action === 'ACCEPTER') {
+            const { tag, subfields } = ecart.unimarc as { tag: string; subfields: Record<string, string> };
+            const parts = Object.entries(subfields)
+              .filter(([, v]) => v)
+              .map(([code, v]) => `$${code}${v}`)
+              .join('');
+            if (parts) {
+              const ligneRegex = new RegExp(`^${tag} (..)\\$.*$`, 'm');
+              const trouvee = unimarcText.match(ligneRegex);
+              unimarcText = trouvee
+                ? unimarcText.replace(ligneRegex, `${tag} ${trouvee[1]}${parts}`)
+                : `${unimarcText}\n${tag} ##${parts}`;
+            }
+            continue;
+          }
+
           // Mapping Syracuse → tag UNIMARC + subfield concerné
           const target = SYRACUSE_TO_UNIMARC[ecart.champ];
           if (!target) continue;
@@ -190,6 +213,16 @@ export async function buildTxtExport(session: Session): Promise<string> {
         }
       }
       
+      // Zone 183 (type de support) proposée quand la notice Sudoc n'en a pas :
+      // ajoutée seulement si la documentaliste a laissé/mis l'action à ACCEPTER.
+      const ecart183 = Array.isArray(result.ecarts)
+        ? result.ecarts.find((e: any) => e.champ === CHAMP_TYPE_SUPPORT)
+        : undefined;
+      if (ecart183 && (ecart183.action === 'ACCEPTER' || ecart183.action === 'MODIFIER') && !/^183 /m.test(unimarcText)) {
+        const ligne183 = (ecart183.action === 'MODIFIER' ? (ecart183.valeurModifiee || '') : LIGNE_183_DEFAUT).trim();
+        if (ligne183) unimarcText += `\n${ligne183}`;
+      }
+
       // Si la notice est rattachée via SRU, mettre à jour la zone 003 (PPN)
       if (result.statutGlobal === 'RATTACHE_SRU' && result.ppn) {
         const ppnRegex = /^003 .*/m;
