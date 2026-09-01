@@ -18,6 +18,21 @@ export function removeAccents(str: string) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+/**
+ * Extrait les IdRef (identifiants d'autorité, 9 caractères comme un PPN) d'une
+ * chaîne d'auteur. Côté Sudoc ils viennent de la sous-zone $3, côté Syracuse ils
+ * sont noyés dans la concaténation "Nom Prénom dates IdRef code_fonction".
+ */
+export function extractIdrefs(value: any): string[] {
+  const matches = String(value ?? '').toUpperCase().match(/(?<!\d)\d{8}[\dX](?!\d)/g) || [];
+  return [...new Set(matches)];
+}
+
+/** Champs dont la valeur décrit un auteur (zones 700/701/702, 710/711/712). */
+export function isAuthorField(champ: string): boolean {
+  return /^(Auteur|Autre auteur)/.test(champ || '');
+}
+
 export function compareFields(champ: string, valSyracuse: any, valSudoc: any): { statut: string, categorie: string } {
   const s1 = valSyracuse !== undefined && valSyracuse !== null ? String(valSyracuse) : '';
   const s2 = valSudoc !== undefined && valSudoc !== null ? String(valSudoc) : '';
@@ -37,6 +52,21 @@ export function compareFields(champ: string, valSyracuse: any, valSudoc: any): {
     const y1 = (s1.match(/\d{4}/) || [''])[0]; const y2 = (s2.match(/\d{4}/) || [''])[0];
     if (y1 && y2 && y1 === y2) return { statut: 'IDENTIQUE', categorie: 'OK' };
     return { statut: 'ERREUR', categorie: 'ERREUR' };
+  }
+  if (isAuthorField(champ)) {
+    // L'IdRef fait foi : même identifiant = même personne, quelle que soit la
+    // graphie. C'est ce qui évite de signaler en ERREUR un "Dupont, Jean" contre
+    // un "Dupont Jean 1932-2011 026927438 070".
+    const idref1 = extractIdrefs(s1); const idref2 = extractIdrefs(s2);
+    if (idref1.length && idref2.length) {
+      const memeAutorite = idref1.some((id) => idref2.includes(id));
+      if (!memeAutorite) return { statut: 'ERREUR', categorie: 'ERREUR' };
+      const a1 = normalizeString(removeAccents(s1)); const a2 = normalizeString(removeAccents(s2));
+      return a1 === a2
+        ? { statut: 'IDENTIQUE', categorie: 'OK' }
+        : { statut: 'DIFFERENCE_MINEURE', categorie: 'MINEURE' };
+    }
+    // Pas d'IdRef d'un côté au moins : on retombe sur la comparaison générique.
   }
   if (champ === 'Titre') {
     const t1 = normalizeString(s1); const t2 = normalizeString(s2);
