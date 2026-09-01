@@ -64,10 +64,15 @@ export const SYRACUSE_TO_UNIMARC: Record<string, { tag: string; code: string }> 
   "Prix": { tag: "010", code: "d" }
 };
 
+// Champs jamais comparés ni modifiés (administratifs ou structurels).
+// Liste alignée sur celle du front (src/App.tsx) et sur la spécification d'origine.
+// Seule exception : "Identifiant d'origine" est réécrit lors d'un rattachement SRU.
 export const UNMODIFIABLE_FIELDS = [
-  "Identifiant", "Identifiant d'origine", "Filtre", "Règle", 
-  "Nombre d'exemplaires", "Référence commerciale", "Référence éditoriale", 
-  "EAN (valeur)", "UPC", "Document", "Type de notice"
+  "Identifiant", "Identifiant d'origine", "Filtre", "Règle",
+  "Nombre d'exemplaires", "Référence commerciale", "Référence éditoriale",
+  "EAN (valeur)", "UPC", "Document", "Type de notice", "Agence de catalogage",
+  "Titre uniforme", "Titre : volume", "Titre de partie et N° de partie",
+  "Titre de série", "Tome", "Nom - Responsabiblité"
 ];
 
 // ─── Pseudo-champs ───────────────────────────────────────────────────────────
