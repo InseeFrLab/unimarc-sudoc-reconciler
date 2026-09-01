@@ -106,7 +106,7 @@ function getAllCandidateProps(c: any): Array<{key:string;label:string;value:stri
   if (!c) return [];
   const res: Array<{key:string;label:string;value:string}> = []; const seen = new Set<string>();
   for (const [k,v] of Object.entries(c)) {
-    if (['ppn','recordData','raw','hasTypeSupport'].includes(k)) continue;
+    if (['ppn','recordData','raw','hasTypeSupport','eanGenerated','collation215','originePiste'].includes(k)) continue;
     const sv = String(v??'').trim(); if (!sv) continue;
     const lb = SUDOC_KEY_LABELS[k]||k; if (seen.has(lb)) continue;
     res.push({key:k,label:lb,value:sv}); seen.add(lb);
@@ -410,14 +410,14 @@ export default function App() {
         <SyracuseRecap record={rec}/>
         {candidates.length===1?(<div className="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden mb-6">
           <div className="bg-indigo-50 px-4 py-3 border-b flex flex-wrap justify-between items-center gap-2">
-            <span className="font-medium text-indigo-900">Un candidat — PPN {padPpn(candidates[0].ppn)} <a href={sudocUrl(candidates[0].ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2">Sudoc<ExternalLink className="w-3 h-3"/></a></span>
+            <span className="font-medium text-indigo-900">Un candidat — PPN {padPpn(candidates[0].ppn)} <a href={sudocUrl(candidates[0].ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2">Sudoc<ExternalLink className="w-3 h-3"/></a>{candidates[0].originePiste==='PPN_TRONQUE'&&<span className="ml-2 text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">PPN Syracuse complété d’un zéro</span>}</span>
             <div className="flex gap-2"><button onClick={()=>handleRattacher(candidates[0].ppn)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 font-medium">✓ Rattacher</button><button onClick={handleMarkAbsent} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">✗ Pas la bonne</button></div>
           </div>
           <div className="p-4"><FullCompareTable record={rec} candidate={candidates[0]}/></div>
         </div>):candidates.length>1?(<div className="space-y-6">
           {candidates.slice(0,10).map((c:any,ci:number)=>(<div key={ci} className="bg-white rounded-xl shadow-sm border overflow-hidden">
             <div className="bg-gray-50 px-4 py-3 border-b flex flex-wrap justify-between items-center gap-2">
-              <span className="font-medium">Candidat {ci+1} — PPN {padPpn(c.ppn)} <a href={sudocUrl(c.ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2 text-sm">Sudoc<ExternalLink className="w-3 h-3"/></a></span>
+              <span className="font-medium">Candidat {ci+1} — PPN {padPpn(c.ppn)} <a href={sudocUrl(c.ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2 text-sm">Sudoc<ExternalLink className="w-3 h-3"/></a>{c.originePiste==='PPN_TRONQUE'&&<span className="ml-2 text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">PPN Syracuse complété d’un zéro</span>}</span>
               <button onClick={()=>handleRattacher(c.ppn)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 font-medium">✓ Sélectionner</button>
             </div>
             <div className="p-4"><FullCompareTable record={rec} candidate={c}/></div>
@@ -470,7 +470,7 @@ export default function App() {
             {manualCandidates.map((c:any,ci:number)=>(
               <div key={ci} className="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div className="bg-gray-50 px-4 py-3 border-b flex flex-wrap justify-between items-center gap-2">
-                  <span className="font-medium">Candidat {ci+1} — PPN {padPpn(c.ppn)} <a href={sudocUrl(c.ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2 text-sm">Sudoc<ExternalLink className="w-3 h-3"/></a></span>
+                  <span className="font-medium">Candidat {ci+1} — PPN {padPpn(c.ppn)} <a href={sudocUrl(c.ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2 text-sm">Sudoc<ExternalLink className="w-3 h-3"/></a>{c.originePiste==='PPN_TRONQUE'&&<span className="ml-2 text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">PPN Syracuse complété d’un zéro</span>}</span>
                   <button onClick={()=>handleRattacher(c.ppn)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 font-medium">✓ Sélectionner</button>
                 </div>
                 <div className="p-4"><FullCompareTable record={rec} candidate={c}/></div>

@@ -273,7 +273,9 @@ export function buildSruQuery(notice: any) {
   const titre = notice['Titre'] || '';
   const auteurPP = notice['Auteur principal - Personne physique'] || '';
   const auteurColl = notice['Auteur principal - Collectivité '] || '';
-  const annee = notice['Publié le'] || '';
+  // Année « exacte » : le champ Syracuse peut contenir « C 2022 » (copyright) ou
+  // « 2022, cop. 2021 ». Le SRU attend 4 chiffres et rien d'autre.
+  const annee = (String(notice['Publié le'] || '').match(/\d{4}/) || [''])[0];
   const motsTitre = titre
     .replace(/[:\-\.,;!?'"()]/g, ' ')
     .split(/\s+/)
