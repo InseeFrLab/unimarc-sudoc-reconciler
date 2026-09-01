@@ -332,11 +332,16 @@ export function unimarcXmlToText(xmlString: string): string {
       const tag = df['@_tag'] || '';
       if (HOLDINGS_TAGS.has(tag) || EXCLUDED_TAGS.has(tag)) continue;  // filtrer les zones d'exemplaires et exclues
 
-      const ind1 = df['@_ind1'] !== undefined ? String(df['@_ind1']) : ' ';
-      const ind2 = df['@_ind2'] !== undefined ? String(df['@_ind2']) : ' ';
-      
-      // Convertir les espaces des indicateurs en '#' pour la lisibilité
-      const indStr = (ind1 === ' ' ? '#' : ind1) + (ind2 === ' ' ? '#' : ind2);
+      // Indicateurs : WINIBW en attend TOUJOURS deux caractères, '#' tenant lieu
+      // d'espace. Attention : le parser XML trime les attributs, donc ind1=" "
+      // arrive ici sous la forme d'une chaîne vide — la tester contre ' ' seul
+      // laissait passer des lignes malformées du type "010 $a..." au lieu de
+      // "010 ##$a...".
+      const indicateur = (v: any) => {
+        const s = v === undefined || v === null ? '' : String(v);
+        return s.trim() === '' ? '#' : s.trim();
+      };
+      const indStr = indicateur(df['@_ind1']) + indicateur(df['@_ind2']);
       
       // Extraire les subfields
       let subfields = df.subfield;
