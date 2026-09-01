@@ -89,6 +89,53 @@ export function generateEanFromIsbn(isbn: string) {
   return '';
 }
 
+// --- Retrouver un PPN à partir d'un ISBN ou d'un EAN (services de l'ABES) ---
+/**
+ * Réponse type du service isbn2ppn / ean2ppn :
+ *   <sudoc><query><isbn>...</isbn><result><ppn>013955896</ppn></result></query></sudoc>
+ * Plusieurs <ppn> peuvent être renvoyés (plusieurs notices pour un même ISBN),
+ * et un <error> remplace le <result> quand rien n'est trouvé.
+ * Isolé de l'appel réseau pour être testable.
+ */
+export function parsePpn2Response(xmlString: string): string[] {
+  try {
+    const parser = new XMLParser(SUDOC_PARSER_OPTIONS);
+    const parsed = parser.parse(String(xmlString));
+    const query = parsed?.sudoc?.query;
+    if (!query) return [];
+    const results = Array.isArray(query.result) ? query.result : (query.result ? [query.result] : []);
+    const ppns: string[] = [];
+    for (const r of results) {
+      const raw = r && typeof r === 'object' && 'ppn' in r ? (r as any).ppn : r;
+      const list = Array.isArray(raw) ? raw : [raw];
+      for (const item of list) {
+        const value = item && typeof item === 'object' ? (item['#text'] ?? '') : item;
+        const ppn = padPpn(value);
+        if (isPpn(ppn) && !ppns.includes(ppn)) ppns.push(ppn);
+      }
+    }
+    return ppns;
+  } catch {
+    return [];
+  }
+}
+
+async function ppnFromService(service: 'isbn2ppn' | 'ean2ppn', value: string): Promise<string[]> {
+  const clean = String(value ?? '').replace(/[^0-9Xx]/g, '');
+  if (!clean) return [];
+  try {
+    const response = await axios.get(`${SUDOC_BASE_URL}/services/${service}/${clean}`, { timeout: 15000 });
+    return parsePpn2Response(response.data);
+  } catch {
+    return []; // service muet ou ISBN inconnu : on reste silencieux, c'est un secours
+  }
+}
+
+/** PPN(s) correspondant à un ISBN. Tableau vide si rien trouvé. */
+export const ppnFromIsbn = (isbn: string) => ppnFromService('isbn2ppn', isbn);
+/** PPN(s) correspondant à un EAN. Tableau vide si rien trouvé. */
+export const ppnFromEan = (ean: string) => ppnFromService('ean2ppn', ean);
+
 // --- Parsing d'une notice UNIMARC Sudoc en objet structuré ---
 export function parseSudocRecord(record: any) {
   if (!record) return null;

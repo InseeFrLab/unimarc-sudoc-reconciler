@@ -402,6 +402,7 @@ export default function App() {
         <div className="flex gap-2"><button onClick={()=>{if(idx>0)setSelectedNoticeId(results[idx-1].identifiant)}} disabled={idx===0} className="px-3 py-1 border rounded disabled:opacity-50"><ArrowLeft className="w-4 h-4"/></button><button onClick={()=>{if(idx<results.length-1)setSelectedNoticeId(results[idx+1].identifiant)}} disabled={idx===results.length-1} className="px-3 py-1 border rounded disabled:opacity-50"><ArrowRight className="w-4 h-4"/></button></div>
       </div>
 
+      {rec.ppnSourceSecours&&<div className="mb-6 bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg flex items-center gap-2"><AlertTriangle className="w-5 h-5"/>Notice retrouvée par {rec.ppnSourceSecours==='ean2ppn'?"l’EAN":"l’ISBN"} : le PPN {padPpn(rec.ppnOrigine)} de Syracuse ne répond pas. Comparaison faite avec le <a href={sudocUrl(rec.ppn)} target="_blank" rel="noreferrer" className="underline">PPN {padPpn(rec.ppn)}</a> — à vérifier avant correction du PPN dans Syracuse.</div>}
       {isRattache&&<div className="mb-6 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-lg flex items-center gap-2"><Link2 className="w-5 h-5"/>Rattachée — <a href={sudocUrl(rec.ppn)} target="_blank" rel="noreferrer" className="underline">PPN {padPpn(rec.ppn)}</a> (PMB: {rec.identifiant})</div>}
 
       {isEnAttente&&(<div className="mb-8">

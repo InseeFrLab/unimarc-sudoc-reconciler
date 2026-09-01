@@ -12,8 +12,33 @@
  * les notices, progression, stockage) reste dans index.ts.
  */
 import { detectCategory } from './syracuse.ts';
-import { fetchSudocRecord, parseSudocXml, buildSruQuery, searchSru } from './marc.ts';
+import {
+  buildSruQuery, fetchSudocRecord, looksLikeTruncatedPpn, padPpn, parseSudocXml,
+  ppnFromEan, ppnFromIsbn, searchSru,
+} from './marc.ts';
 import { compareNoticeWithSudoc } from './compare.ts';
+
+/**
+ * Secours quand le PPN ne ramène rien : l'ISBN, puis l'EAN. Renvoie le premier
+ * couple (PPN, XML) qui répond, ou null. Silencieux par construction : un ISBN
+ * inconnu du Sudoc n'est pas une erreur.
+ */
+async function retrouverParIsbnOuEan(syracuse: any, ppnEcarte: string) {
+  const pistes: Array<{ source: string; valeur: string; chercher: (v: string) => Promise<string[]> }> = [
+    { source: 'isbn2ppn', valeur: syracuse?.['ISBN'] || '', chercher: ppnFromIsbn },
+    { source: 'ean2ppn', valeur: syracuse?.['EAN'] || '', chercher: ppnFromEan },
+  ];
+  for (const piste of pistes) {
+    if (!piste.valeur) continue;
+    const candidats = await piste.chercher(piste.valeur);
+    for (const candidat of candidats) {
+      if (candidat === ppnEcarte) continue; // déjà tenté, inutile de rejouer
+      const xml = await fetchSudocRecord(candidat);
+      if (xml) return { ppn: candidat, xml, source: piste.source };
+    }
+  }
+  return null;
+}
 
 export async function verifyNotice(notice: any) {
   const base = { ppn: notice.ppn, titre: notice.titre, identifiant: notice.identifiant };
@@ -21,9 +46,22 @@ export async function verifyNotice(notice: any) {
     const categorie = detectCategory(notice.syracuse);
 
     if (categorie === 'A') {
-      const sudocXml = await fetchSudocRecord(notice.ppn);
+      const ppnInitial = padPpn(notice.ppn);
+      let ppnUtilise = ppnInitial;
+      let sudocXml = await fetchSudocRecord(ppnInitial);
+      let ppnSourceSecours: string | undefined;
+
       if (!sudocXml) {
-        return { ...base, categorie: 'A', statutGlobal: 'NON_TROUVE', ecarts: [] };
+        const secours = await retrouverParIsbnOuEan(notice.syracuse, ppnInitial);
+        if (secours) {
+          sudocXml = secours.xml;
+          ppnUtilise = secours.ppn;
+          ppnSourceSecours = secours.source;
+        }
+      }
+
+      if (!sudocXml) {
+        return { ...base, ppn: ppnInitial, categorie: 'A', statutGlobal: 'NON_TROUVE', ecarts: [] };
       }
       const sudocData = parseSudocXml(sudocXml);
       const { ecarts, nbErreurs, nbComplements, nbMineures } =
@@ -33,8 +71,11 @@ export async function verifyNotice(notice: any) {
       else if (nbComplements > 0) statutGlobal = 'COMPLEMENT';
       else if (nbMineures > 0) statutGlobal = 'MINEURE';
       return {
-        ...base, categorie: 'A', syracuse: notice.syracuse, sudoc: sudocData, sudocXml,
+        ...base, ppn: ppnUtilise, categorie: 'A', syracuse: notice.syracuse, sudoc: sudocData, sudocXml,
         statutGlobal, nbErreurs, nbComplements, nbMineures, ecarts,
+        // Renseignés seulement si le PPN d'origine était muet : la documentaliste
+        // doit voir que le rattachement vient de l'ISBN/EAN, pas du PPN Syracuse.
+        ...(ppnSourceSecours ? { ppnSourceSecours, ppnOrigine: ppnInitial } : {}),
       };
     }
 
