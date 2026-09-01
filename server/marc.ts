@@ -286,6 +286,8 @@ export async function fetchSudocRecord(ppnBrut: string): Promise<string | null> 
 }
 
 // --- Conversion UNIMARC XML -> texte WINIBW (export .txt) ---
+// Zones absentes de l'export WINIBW : techniques, de gestion, ou déjà présentes
+// dans la notice Sudoc que l'on vient corriger (000 leader, 008 type de notice).
 export const EXCLUDED_TAGS = new Set(['000', '004', '005', '006', '007', '008', '020', '579', '676', '680', '686', '801', '931', '990', '992']);
 export const HOLDINGS_TAGS = new Set(['915', '917', '930', '940', '941', '991', '999']);
 
@@ -296,16 +298,15 @@ export function unimarcXmlToText(xmlString: string): string {
   if (!record) return '';
   
   const lines: string[] = [];
-  
-  // 1. Leader (zone 000) — facultatif, présent dans certaines notices
-  if (record.leader && !EXCLUDED_TAGS.has('000')) {
-    const leaderText = typeof record.leader === 'string' 
-      ? record.leader 
-      : (record.leader['#text'] || '');
-    if (leaderText) lines.push(`000 $0${leaderText}`);
-  }
-  
-  // 2. Controlfields (zones 001, 003, 005, 008, etc.) — pas d'indicateurs ni de subfields
+
+  // 1. Le leader (000) et la zone 008 ne sont PAS exportés — décision assumée :
+  //    ce fichier sert à corriger dans WINIBW une notice Sudoc qui existe déjà
+  //    (elle vient du Sudoc), pas à en créer une de zéro. Ces deux zones y sont
+  //    donc déjà, et les recopier n'apporterait que du bruit à coller.
+  //    Si le besoin de créer des notices apparaît : retirer '000' et '008' de
+  //    EXCLUDED_TAGS et rétablir leur mise en forme (000 $0…, 008 $a…).
+
+  // 2. Controlfields (001, 003, ...) — pas d'indicateurs ni de sous-zones
   let controlfields = record.controlfield;
   if (controlfields) {
     if (!Array.isArray(controlfields)) controlfields = [controlfields];
@@ -314,14 +315,7 @@ export function unimarcXmlToText(xmlString: string): string {
       if (EXCLUDED_TAGS.has(tag)) continue;
       
       const value = (cf['#text'] !== undefined ? String(cf['#text']) : String(cf || '')).trim();
-      if (tag && value) {
-        // Format spécifique : 008 a un préfixe $a, les autres non
-        if (tag === '008') {
-          lines.push(`${tag} $a${value}`);
-        } else {
-          lines.push(`${tag} ${value}`);
-        }
-      }
+      if (tag && value) lines.push(`${tag} ${value}`);
     }
   }
   
