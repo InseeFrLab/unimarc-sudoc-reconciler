@@ -5,9 +5,9 @@ metadata:
   # ⚠️ À ADAPTER : même namespace que le Deployment
   namespace: user-mhillion
   annotations:
-    # Timeout long pour les connexions SSE (suivi de progression).
-    # Sans ça, nginx couperait la connexion au bout de 60 s et la
-    # barre de progression se figerait pendant la vérification.
+    # Timeout long : la vérification d'un gros fichier peut occuper le
+    # serveur plusieurs minutes (500 ms de pause par notice). Sans ça,
+    # nginx couperait des requêtes au bout de 60 s.
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
