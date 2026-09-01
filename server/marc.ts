@@ -113,7 +113,8 @@ export function parseSudocRecord(record: any) {
     result.isbn = getSubfield(zone010, 'a') || '';
     result.prix = getSubfield(zone010, 'd') || '';
     let reliure = getSubfield(zone010, 'b') || '';
-    reliure = reliure.replace(/\bbr\.\b/gi, 'broché').replace(/\brel\.\b/gi, 'relié');
+    // Pas de \b après le point : "br." en fin de chaîne ne matcherait jamais.
+    reliure = reliure.replace(/\bbr\./gi, 'broché').replace(/\brel\./gi, 'relié');
     result.reliure = reliure;
   }
   const zone073 = findDatafield('073');
