@@ -1,7 +1,7 @@
 {
-  "name": "verificateur-syracuse-sudoc",
+  "name": "unimarc-sudoc-reconciler",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.4.0",
   "type": "module",
   "description": "Vérifie et corrige les notices Syracuse en les comparant au catalogue Sudoc.",
   "scripts": {
