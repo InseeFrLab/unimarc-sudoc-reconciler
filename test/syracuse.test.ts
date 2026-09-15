@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import {
-  CHAMP_TYPE_SUPPORT, PSEUDO_UNIMARC_FIELDS, SYRACUSE_TO_UNIMARC, UNMODIFIABLE_FIELDS,
-  detectCategory, parseSyracuseNotices,
+  CHAMP_TYPE_SUPPORT, PSEUDO_UNIMARC_FIELDS, SYRACUSE_MAPPING, SYRACUSE_TO_UNIMARC,
+  UNMODIFIABLE_FIELDS, detectCategory, parseSyracuseNotices,
 } from '../server/syracuse.ts';
 
 const EXPORT_SYRACUSE = readFileSync(
@@ -66,6 +66,18 @@ describe('tables de correspondance', () => {
     for (const champ of ['Identifiant', "Identifiant d'origine", 'Filtre', 'Tome', 'Titre uniforme', 'Nom - Responsabiblité']) {
       assert.ok(UNMODIFIABLE_FIELDS.includes(champ), champ);
     }
+  });
+  // Régression : la clé portait l'espace final du XML alors que fast-xml-parser
+  // trime les valeurs d'attributs. Le mapping n'était donc jamais atteint et la
+  // colonne Syracuse de l'auteur collectivité restait vide.
+  it('indexe l’auteur collectivité sous le libellé trimé par le parseur', () => {
+    const { notices } = parseSyracuseNotices(EXPORT_SYRACUSE);
+    const collectivite = notices[2].properties
+      .map((p: any) => p['@_name'])
+      .find((n: string) => n.startsWith('Auteur principal - Collectivité'));
+    assert.equal(collectivite, 'Auteur principal - Collectivité');
+    assert.equal(SYRACUSE_MAPPING[collectivite], 'auteurPrincipalCollectivite');
+    assert.equal(notices[2].syracuse[collectivite], 'Institut national de la statistique');
   });
   it('déclare le pseudo-champ 183 comme non écrivable dans Syracuse', () => {
     assert.ok(PSEUDO_UNIMARC_FIELDS.has(CHAMP_TYPE_SUPPORT));

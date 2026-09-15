@@ -25,7 +25,11 @@ export const SYRACUSE_MAPPING: Record<string, string> = {
   "Auteur principal - Personne physique": "auteurPrincipal",
   "Autre auteur principal - Personne physique": "autresAuteurs",
   "Auteur secondaire - Personne physique": "auteursSecondaires",
-  "Auteur principal - Collectivité ": "auteurPrincipalCollectivite",
+  // Le libellé porte un espace final dans le XML Syracuse, mais fast-xml-parser
+  // trime les valeurs d'attributs : le nom arrive ici SANS cet espace. La clé
+  // doit donc être trimée, sinon le mapping n'est jamais atteint. Les fautes
+  // INTERNES des libellés restent, elles, telles quelles (voir ci-dessous).
+  "Auteur principal - Collectivité": "auteurPrincipalCollectivite",
   "Autre auteur principal - Collectivité": "autreAuteurPrincipalCollectivite",
   "Auteur secondaire- Collectivité": "auteurSecondaireCollectivite",
   "Editeur": "editeur", "Publié le": "annee", "ISBN": "isbn", "EAN": "ean",
