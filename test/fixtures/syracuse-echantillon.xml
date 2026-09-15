@@ -33,5 +33,8 @@
     <property name="Filtre" value="PMB.BIB" rank="3" referentialType="" referentialName="" />
     <property name="Titre" value="Le recensement de la population de 1954" rank="4" referentialType="" referentialName="" />
     <property name="Publié le" value="1956" rank="5" referentialType="" referentialName="" />
+    <!-- Espace final du libellé reproduit tel quel : c'est la forme réelle de
+         l'export Syracuse, et fast-xml-parser la trime au parsing. -->
+    <property name="Auteur principal - Collectivité " value="Institut national de la statistique" rank="6" referentialType="" referentialName="" />
   </item>
 </items>

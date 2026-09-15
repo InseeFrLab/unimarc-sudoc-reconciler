@@ -30,7 +30,8 @@ const SYRACUSE_MAPPING: Record<string, string> = {
   "Auteur principal - Personne physique": "auteurPrincipal",
   "Autre auteur principal - Personne physique": "autresAuteurs",
   "Auteur secondaire - Personne physique": "auteursSecondaires",
-  "Auteur principal - Collectivité ": "auteurPrincipalCollectivite",
+  // Espace final absent à dessein : fast-xml-parser le trime côté serveur.
+  "Auteur principal - Collectivité": "auteurPrincipalCollectivite",
   "Autre auteur principal - Collectivité": "autreAuteurPrincipalCollectivite",
   "Auteur secondaire- Collectivité": "auteurSecondaireCollectivite",
   "Editeur": "editeur", "Publié le": "annee", "ISBN": "isbn", "EAN": "ean",
@@ -72,31 +73,44 @@ function padPpn(ppn: string|undefined|null): string {
 function sudocUrl(ppn: string|undefined|null): string { return `https://www.sudoc.fr/${padPpn(ppn)}`; }
 function sudocXmlUrl(ppn: string|undefined|null): string { return `https://www.sudoc.fr/${padPpn(ppn)}.xml`; }
 
-function getSyrProp(record: any, name: string): string {
-  if (!record) return '';
+/**
+ * Les champs Syracuse d'une notice circulent sous deux formes : le tableau brut
+ * `properties` issu du parseur XML (`@_name` / `@_value`), et la table plate
+ * `syracuse` construite par parseSyracuseNotices, indexée par le libellé Syracuse.
+ * Les résultats de vérification ne transportent que la seconde — l'ignorer
+ * laissait la colonne Syracuse du tableau des candidats vide (catégorie B).
+ * Les libellés sont renvoyés TELS QUELS : ce sont les clés de SYRACUSE_MAPPING,
+ * fautes comprises (« Auteur secondaire- Collectivité »).
+ */
+function syracuseEntries(record: any): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
   for (const src of [record?.syracuse?.properties, record?.properties]) {
-    if (Array.isArray(src)) {
-      const f = src.find((p:any) => (p['@_name']??p.name) === name);
-      if (f) { const v = (f['@_value']??f.value??'').trim(); if (v) return v; }
+    if (!Array.isArray(src)) continue;
+    for (const p of src) {
+      out.push([String(p['@_name'] ?? p.name ?? ''), String(p['@_value'] ?? p.value ?? '').trim()]);
     }
   }
-  const k = SYRACUSE_MAPPING[name];
-  if (k) { const v = record?.[k] || record?.syracuse?.[k]; if (v) return String(v).trim(); }
-  return '';
+  const plat = record?.syracuse;
+  if (plat && typeof plat === 'object' && !Array.isArray(plat)) {
+    for (const [nom, valeur] of Object.entries(plat)) {
+      if (typeof valeur !== 'string' && typeof valeur !== 'number') continue;
+      out.push([nom, String(valeur).trim()]);
+    }
+  }
+  return out;
 }
 
 function getAllSyrProps(record: any): Array<{name:string;value:string}> {
   const res: Array<{name:string;value:string}> = []; const seen = new Set<string>();
-  for (const src of [record?.syracuse?.properties, record?.properties]) {
-    if (!Array.isArray(src)) continue;
-    for (const p of src) {
-      const n = (p['@_name']??p.name??'').trim(), v = (p['@_value']??p.value??'').trim();
-      if (n && v && !UNMODIFIABLE_FIELDS.has(n) && !seen.has(n)) { res.push({name:n,value:v}); seen.add(n); }
-    }
+  for (const [name, value] of syracuseEntries(record)) {
+    if (!name || !value || UNMODIFIABLE_FIELDS.has(name) || seen.has(name)) continue;
+    res.push({name,value}); seen.add(name);
   }
+  // Dernier recours : les quelques champs remontés à plat sur le résultat de
+  // vérification lui-même (`titre`, posé par verifyNotice).
   for (const [sn, sk] of Object.entries(SYRACUSE_MAPPING)) {
     if (seen.has(sn)) continue;
-    const v = record?.[sk] || record?.syracuse?.[sk];
+    const v = record?.[sk];
     if (v && String(v).trim()) { res.push({name:sn,value:String(v).trim()}); seen.add(sn); }
   }
   return res;

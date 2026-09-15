@@ -212,4 +212,14 @@ describe('buildSruQuery — critères de recherche par contenu (§3.3.2)', () =>
     const q = buildSruQuery({ 'Titre': 'alpha beta gamma delta epsilon zeta eta theta' });
     assert.equal(q.motsTitre.split('+').length, 5);
   });
+  // Le libellé porte un espace final dans le XML, que fast-xml-parser trime :
+  // la notice qui parvient ici est donc indexée sans cet espace.
+  it('retombe sur l’auteur collectivité quand la personne physique manque', () => {
+    const q = buildSruQuery({
+      'Titre': 'Annuaire statistique du Brésil',
+      'Auteur principal - Personne physique': '',
+      'Auteur principal - Collectivité': 'Instituto brasileiro de geografia e estatística',
+    });
+    assert.equal(q.nomAuteur, 'Instituto+brasileiro');
+  });
 });
