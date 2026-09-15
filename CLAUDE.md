@@ -61,9 +61,15 @@ justification : [docs/metier-unimarc-sudoc.md](docs/metier-unimarc-sudoc.md).
   sinon `fast-xml-parser` transforme `026927438` en nombre et détruit le zéro
   initial des PPN (zone 001) et des IdRef (`$3`). Même raison côté Syracuse avec
   `parseAttributeValue: false`.
-- **Libellés de champs Syracuse tels quels**, fautes et espaces parasites compris
-  (`Auteur principal - Collectivité ` avec espace final, `Auteur secondaire- Collectivité`
-  sans espace, `Nom - Responsabiblité`). Ce sont les clés de `SYRACUSE_MAPPING`.
+- **Libellés de champs Syracuse tels quels**, fautes internes comprises
+  (`Auteur secondaire- Collectivité` sans espace avant le tiret,
+  `Nom - Responsabiblité`). Ce sont les clés de `SYRACUSE_MAPPING`.
+  **Exception : les espaces de bord.** Le XML porte
+  `name="Auteur principal - Collectivité "` avec un espace final, mais
+  `fast-xml-parser` trime les valeurs d'attributs — et le nom d'un champ est
+  lui-même une valeur d'attribut. Le libellé arrive donc **sans** cet espace :
+  les clés des tables et toute lecture directe (`buildSruQuery`) doivent utiliser
+  la forme trimée, sinon le mapping n'est jamais atteint.
 - **Zones UNIMARC** mappées dans `parseSudocRecord` (200 titre, 010 ISBN, 214/210
   éditeur, 215 collation, 225 collection, 330 résumé, 327 TdM, 700/701/702 et
   710/711/712 auteurs, 600/601/606/607/608 vedettes, 300-305 notes).
@@ -113,7 +119,10 @@ Corrections déjà appliquées, à ne pas défaire :
 
 - **`base: './'`** dans `vite.config.ts` : indispensable pour que les assets
   (JS, CSS) se chargent derrière un proxy (SSP Cloud, port forwarding VSCode).
-  Sans ça → page blanche.
+  Sans ça → page blanche. **Ne vaut que pour `vite build`** : le serveur de dev
+  ramène toute base relative à `/`, donc `npm run dev` est inutilisable derrière
+  un proxy à préfixe — c'est `npm run start` qu'il faut lancer. Explication
+  complète côté humain dans le [README](README.md#derrière-un-proxy-ssp-cloud-code-server).
 - **Chemins API relatifs** dans `src/App.tsx` : `api/upload` et non `/api/upload`.
   Même raison : un chemin absolu ne passe pas si l'appli est servie derrière un
   sous-chemin de proxy. Appliqué à tous les `fetch()`.
@@ -124,6 +133,11 @@ Corrections déjà appliquées, à ne pas défaire :
   reproductibilité de la seule brique non déterministe.
 - **Export XML** : itérer sur `session.notices`, pas sur
   `session.parsedXml.items.item` (source d'un bug d'export vide).
+- **Colonne « Syracuse » du tableau des candidats** (catégorie B) : un résultat de
+  vérification ne transporte **pas** le tableau `properties`, seulement la table
+  plate `syracuse` (libellé Syracuse → valeur). `getAllSyrProps` dans
+  `src/App.tsx` doit donc lire cette table ; la chercher par clés internes
+  (`editeur`, `annee`…), qui n'existent que côté Sudoc, ne remontait que le titre.
 
 Incohérences résiduelles, non corrigées, à connaître avant de toucher au code :
 

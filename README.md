@@ -100,6 +100,32 @@ Les tests utilisent le lanceur intégré de Node (`node:test`) via `tsx` — auc
 dépendance supplémentaire. Ils travaillent sur des notices figées dans
 `test/fixtures/`, donc ils ne sollicitent ni le Sudoc ni le LLM.
 
+### Derrière un proxy (SSP Cloud, code-server)
+
+Si vous ouvrez l'application par une URL **à préfixe** — typiquement
+`https://<votre-service>.user.lab.sspcloud.fr/proxy/3000/` sur le SSP Cloud —
+`npm run dev` affiche une **page blanche**. Passer par le mode production :
+
+```bash
+npm run build && npm run start
+```
+
+Pourquoi : le serveur de développement de Vite référence ses fichiers en chemins
+**absolus** (`/src/main.tsx`), qui sortent du préfixe `/proxy/3000/` et visent la
+racine du service au lieu de l'application — d'où des 401 et un `<div id="root">`
+qui reste vide. Le `base: './'` de `vite.config.ts` produit bien des chemins
+relatifs (`./assets/…`), mais **il ne s'applique qu'au build** : le serveur de dev
+ramène toute base relative à `/`. Seul `npm run start` fonctionne donc derrière un
+proxy, au prix du rechargement à chaud — après chaque modification de `src/`,
+refaire `npm run build` (quelques secondes) et rafraîchir. Le backend, lui, reste
+rechargé automatiquement par `tsx`.
+
+Ne pas tenter `/absproxy/3000/`, la variante de code-server qui **conserve** le
+préfixe : le front appelle l'API en relatif (`api/upload`) en comptant précisément
+sur le fait que `/proxy/` retire le préfixe avant de transmettre. Avec
+`/absproxy/`, Express recevrait `/absproxy/3000/api/upload` et répondrait 404 à
+tous les appels.
+
 ## Configuration
 
 | Variable | Rôle | Défaut |
