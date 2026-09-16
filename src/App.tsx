@@ -409,6 +409,10 @@ export default function App() {
     const handleBulk=async(a:string)=>{try{await fetch(`api/results/${sessionId}/bulk-action`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:a,ppn:rec.identifiant})});fetchResults(sessionId!, true);}catch(e){console.error(e);}};
     const generateAi=async()=>{if(!llmConfig.connected){setAiError("Configurez le LLM.");return;}setIsGeneratingAi(true);setAiError(null);try{const r=await fetch(`api/suggest-keywords/${sessionId}/${rec.identifiant}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:llmConfig.endpoint,apiKey:llmConfig.apiKey,model:llmConfig.model})});const d=await r.json();if(d.suggestions){setAiSuggestions(d.suggestions);setResults(p=>p.map(x=>x.identifiant===rec.identifiant?{...x,aiSuggestions:d.suggestions}:x));}else if(d.error)setAiError(d.error);}catch{setAiError("Erreur IA.");}finally{setIsGeneratingAi(false);}};
     const syncAiKw = (ns: any[]) => { fetch(`api/results/${sessionId}/${rec.identifiant}/update-ai-suggestions`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ suggestions: ns }) }).catch(console.error); };
+    const estDerniere = idx >= results.length - 1;
+    // Remonte en haut : on déclenche ce passage depuis le bas d'une page longue,
+    // sans quoi on arriverait au pied de la notice suivante.
+    const noticeSuivante = () => { if (estDerniere) return; setSelectedNoticeId(results[idx + 1].identifiant); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
     return (<div className="max-w-7xl mx-auto py-8 px-4">
       <div className="mb-6 flex items-center justify-between">
@@ -521,10 +525,22 @@ export default function App() {
 
       {/* Bouton de validation placé APRÈS les suggestions : le choix des mots-clés
           se fait donc avant de valider la notice. */}
-      {hasSudoc&&<div className="mt-8 flex justify-end">
+      {hasSudoc&&<div className="mt-8 flex flex-col items-end gap-3">
         <button onClick={handleValider} className={`px-6 py-2 text-white rounded-lg font-medium flex items-center gap-2 transition-colors ${rec.statutGlobal === 'VALIDE' ? 'bg-green-800 hover:bg-green-900' : 'bg-green-500 hover:bg-green-600'}`}>
           <CheckCircle className="w-5 h-5" /> {rec.statutGlobal === 'VALIDE' ? 'Notice validée' : 'Valider la notice'}
         </button>
+        {/* Raccourcis de sortie, doublant volontairement les contrôles du haut de
+            page : après avoir traité tous les écarts, on se trouve ici, en bas
+            d'une page longue. */}
+        <div className="flex items-center gap-4 text-sm">
+          <button onClick={()=>setView('DASHBOARD')} className="flex items-center gap-1 text-gray-600 hover:text-[#003366] hover:underline">
+            <ArrowLeft className="w-4 h-4"/>Tableau de bord
+          </button>
+          <span className="text-gray-300" aria-hidden="true">|</span>
+          <button onClick={noticeSuivante} disabled={estDerniere} title={estDerniere?'Dernière notice de la liste':undefined} className="flex items-center gap-1 text-[#003366] hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed">
+            Notice suivante<ArrowRight className="w-4 h-4"/>
+          </button>
+        </div>
       </div>}
     </div>);
   };
