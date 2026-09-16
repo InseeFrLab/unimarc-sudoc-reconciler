@@ -17,7 +17,15 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/inseefrlab/unimarc-sudoc-reconciler:latest
+          # ⚠️ À ADAPTER : image épinglée par le SHA du commit à déployer.
+          # Volontairement PAS `:latest` : ArgoCD compare le texte de ce fichier
+          # à l'état du cluster, et un tag mouvant ne change jamais ce texte —
+          # une nouvelle image ne serait donc jamais déployée. Épingler le SHA
+          # fait de chaque mise en production un commit, qu'ArgoCD applique seul.
+          # Procédure de mise à jour : voir le README, section « Déploiement ».
+          image: ghcr.io/inseefrlab/unimarc-sudoc-reconciler:e48dca6cfb0752a71c4335076708b38a6f809ffd
+          # Sans effet avec un tag épinglé (l'image est immuable), conservé pour
+          # que le manifeste reste correct si quelqu'un revient à un tag mouvant.
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
