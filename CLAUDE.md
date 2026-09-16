@@ -37,6 +37,7 @@ tranche.
 | `verify.ts` | Traitement d'une notice (A ou B) → objet résultat. |
 | `exports.ts` | `buildXmlExport`, `buildCsvExport`, `buildTxtExport`. |
 | `llm.ts` | Déduction de l'URL de listing des modèles à partir de l'endpoint de chat. |
+| `version.ts` | Version exécutée (SHA gravé dans l'image via `GIT_SHA`), servie par `GET /api/version`. |
 
 Le prompt RAMEAU et l'appel au LLM sont dans `index.ts`, pas dans `llm.ts`.
 
@@ -117,6 +118,14 @@ justification : [docs/metier-unimarc-sudoc.md](docs/metier-unimarc-sudoc.md).
   voit jamais rien changer, et la nouvelle image n'est jamais déployée. Mettre en
   production = reporter le SHA dans ce fichier et pousser. Ne pas revenir à un tag
   mouvant ; procédure détaillée dans le [README](README.md#mettre-en-production-une-nouvelle-version).
+- **Vérifier un déploiement** : `./scripts/verifier-deploiement.sh` (droits de
+  lecture suffisants). La preuve directe est `GET /api/version`, qui renvoie le SHA
+  gravé dans l'image. Si la chaîne `build-args: GIT_SHA` → `ARG`/`ENV` du
+  `Dockerfile` → `server/version.ts` est rompue, la route répond
+  `"source": "inconnu"` et la vérification perd sa valeur.
+- Pour comprendre la chaîne de déploiement de bout en bout (image, tag, registre,
+  manifeste, pod, ArgoCD), voir [apprendre.md](apprendre.md) — écrit pour un
+  public non spécialiste.
 
 ## Pièges connus
 

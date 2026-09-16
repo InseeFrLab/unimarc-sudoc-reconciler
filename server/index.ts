@@ -22,6 +22,7 @@ import { compareNoticeWithSudoc } from './compare.ts';
 import { verifyNotice } from './verify.ts';
 import { buildXmlExport, buildCsvExport, buildTxtExport } from './exports.ts';
 import { getModelsUrl } from './llm.ts';
+import { getVersionInfo } from './version.ts';
 
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
 process.on('unhandledRejection', (reason) => console.error('Unhandled Rejection:', reason));
@@ -41,6 +42,13 @@ const apiErrorHandler = (err: any, req: express.Request, res: express.Response, 
   console.error('API Error:', err);
   res.status(500).json({ error: err.message || 'Erreur serveur interne' });
 };
+
+// ─────────────────────────────────────────────────────────────
+// 0) Version en cours d'exécution — permet de vérifier depuis
+//    l'extérieur que le site déployé correspond bien au dernier
+//    code commité (voir scripts/verifier-deploiement.sh).
+// ─────────────────────────────────────────────────────────────
+app.get('/api/version', (req, res) => res.json(getVersionInfo()));
 
 // ─────────────────────────────────────────────────────────────
 // 1) Upload d'un export XML Syracuse -> création d'une session

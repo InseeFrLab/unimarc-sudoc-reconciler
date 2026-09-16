@@ -66,6 +66,7 @@ efface les sessions en cours.
 | --- | --- |
 | le contexte, le démarrage, le déploiement | ce fichier |
 | le savoir métier : formats Syracuse et UNIMARC, web services de l'ABES, règles de normalisation, mappings | [docs/metier-unimarc-sudoc.md](docs/metier-unimarc-sudoc.md) |
+| comprendre le déploiement de zéro : image, tag, registre, manifeste, pod, ArgoCD | [apprendre.md](apprendre.md) |
 | les invariants à ne pas casser en modifiant le code, la carte des modules | [CLAUDE.md](CLAUDE.md) |
 | l'historique de conception du POC (document d'archive) | [docs/historique-conception.md](docs/historique-conception.md) |
 
@@ -191,7 +192,11 @@ Détail des modules et des invariants : [CLAUDE.md](CLAUDE.md).
 │   ├── compare.ts        # comparaison champ à champ
 │   ├── verify.ts         # traitement d'une notice
 │   ├── exports.ts        # génération XML / CSV / TXT
-│   └── llm.ts            # URL de listing des modèles LLM
+│   ├── llm.ts            # URL de listing des modèles LLM
+│   └── version.ts        # version exécutée, exposée sur /api/version
+├── scripts/
+│   └── verifier-deploiement.sh  # le site déployé est-il à jour ?
+├── apprendre.md          # cours : la chaîne de déploiement expliquée
 ├── docs/
 │   ├── metier-unimarc-sudoc.md    # savoir métier (formats, mappings, règles)
 │   └── historique-conception.md   # spécification d'origine (archive)
@@ -274,8 +279,24 @@ ArgoCD applique de lui-même.
 3. Reporter ce SHA dans le champ `image:` de `deploy/deployment.yaml`, puis pousser
    sur `main`. ArgoCD détecte le changement et redéploie seul, en une minute ou
    deux.
-4. Contrôler : `kubectl get pods -l app=unimarc-sudoc-reconciler` doit montrer un
-   pod fraîchement créé.
+4. Contrôler, avec `./scripts/verifier-deploiement.sh` : les quatre verdicts
+   doivent passer au ✓. Le contrôle le plus direct est celui de la dernière
+   ligne — l'application déclare elle-même sur quel commit elle a été construite :
+
+   ```
+   curl -s https://unimarc-sudoc-reconciler.lab.sspcloud.fr/api/version
+   {"version":"1.4.0","commit":"e48dca6cfb…","source":"image","demarrage":"…"}
+   ```
+
+   Ce SHA est gravé dans l'image à sa construction (`build-args: GIT_SHA` dans le
+   workflow → `ARG`/`ENV` dans le `Dockerfile` → [server/version.ts](server/version.ts)),
+   il ne peut donc pas mentir. Tout le mécanisme est expliqué pas à pas dans
+   [apprendre.md](apprendre.md).
+
+   Note : un changement **applicatif** demande deux commits, puisqu'on ne connaît
+   le SHA qu'une fois le merge fait. Fusionner d'abord la PR, laisser le workflow
+   publier l'image, puis pousser sur `main` un second commit qui reporte le SHA du
+   commit de merge dans `deploy/deployment.yaml`.
 
 Quelques conséquences utiles :
 
