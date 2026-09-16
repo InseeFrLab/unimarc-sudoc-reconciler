@@ -30,6 +30,14 @@ RUN npm run build
 ENV NODE_ENV=production
 ENV PORT=3000
 
+#    SHA du commit d'où vient ce code, passé par GitHub Actions
+#    (--build-arg GIT_SHA=...). L'application le renvoie sur
+#    GET /api/version : c'est ce qui permet de vérifier de l'extérieur
+#    quelle version tourne réellement. Vide si l'image est construite
+#    à la main sans cet argument.
+ARG GIT_SHA=""
+ENV GIT_SHA=$GIT_SHA
+
 # 8. Le conteneur écoute sur ce port.
 EXPOSE 3000
 

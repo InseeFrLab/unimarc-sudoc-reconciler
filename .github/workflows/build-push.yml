@@ -53,6 +53,10 @@ jobs:
         with:
           context: .
           push: true
+          # Grave le SHA du commit dans l'image : l'application le renvoie
+          # ensuite sur GET /api/version.
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}

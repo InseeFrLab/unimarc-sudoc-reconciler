@@ -17,15 +17,28 @@ spec:
     spec:
       containers:
         - name: app
-          # ⚠️ À ADAPTER : image épinglée par le SHA du commit à déployer.
-          # Volontairement PAS `:latest` : ArgoCD compare le texte de ce fichier
-          # à l'état du cluster, et un tag mouvant ne change jamais ce texte —
-          # une nouvelle image ne serait donc jamais déployée. Épingler le SHA
-          # fait de chaque mise en production un commit, qu'ArgoCD applique seul.
-          # Procédure de mise à jour : voir le README, section « Déploiement ».
-          image: ghcr.io/inseefrlab/unimarc-sudoc-reconciler:e48dca6cfb0752a71c4335076708b38a6f809ffd
-          # Sans effet avec un tag épinglé (l'image est immuable), conservé pour
-          # que le manifeste reste correct si quelqu'un revient à un tag mouvant.
+          # ⚠️ À ADAPTER : l'image publiée par GitHub Actions.
+          #
+          # `latest` est une étiquette MOUVANTE : le workflow la recolle sur
+          # l'image la plus récente à chaque push sur main. Conséquence à
+          # connaître — ArgoCD compare le TEXTE de ce fichier à l'état du
+          # cluster, or ce texte ne change jamais. Il ne redéploiera donc
+          # rien de lui-même quand une nouvelle image est publiée, et le pod
+          # continuera d'exécuter l'image téléchargée à son démarrage.
+          #
+          # La mise en production se fait donc à la main : bouton « Restart »
+          # sur le Deployment dans l'interface ArgoCD. C'est un choix assumé
+          # (voir README, « Mettre en production une nouvelle version »), qui
+          # évite qu'un déploiement surprise n'efface les sessions de
+          # vérification en cours — l'application n'a aucune persistance.
+          #
+          # Pour savoir si un redémarrage est nécessaire :
+          # ./scripts/verifier-deploiement.sh
+          image: ghcr.io/inseefrlab/unimarc-sudoc-reconciler:latest
+          # Indispensable ici : sans cela, un pod recréé pourrait réutiliser
+          # l'image déjà présente sur le nœud au lieu de retélécharger celle
+          # que `latest` désigne maintenant — et le redémarrage ne servirait
+          # à rien.
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
