@@ -525,23 +525,26 @@ export default function App() {
 
       {/* Bouton de validation placé APRÈS les suggestions : le choix des mots-clés
           se fait donc avant de valider la notice. */}
-      {hasSudoc&&<div className="mt-8 flex flex-col items-end gap-3">
+      {hasSudoc&&<div className="mt-8 flex justify-end">
         <button onClick={handleValider} className={`px-6 py-2 text-white rounded-lg font-medium flex items-center gap-2 transition-colors ${rec.statutGlobal === 'VALIDE' ? 'bg-green-800 hover:bg-green-900' : 'bg-green-500 hover:bg-green-600'}`}>
           <CheckCircle className="w-5 h-5" /> {rec.statutGlobal === 'VALIDE' ? 'Notice validée' : 'Valider la notice'}
         </button>
-        {/* Raccourcis de sortie, doublant volontairement les contrôles du haut de
-            page : après avoir traité tous les écarts, on se trouve ici, en bas
-            d'une page longue. */}
-        <div className="flex items-center gap-4 text-sm">
-          <button onClick={()=>setView('DASHBOARD')} className="flex items-center gap-1 text-gray-600 hover:text-[#003366] hover:underline">
-            <ArrowLeft className="w-4 h-4"/>Tableau de bord
-          </button>
-          <span className="text-gray-300" aria-hidden="true">|</span>
-          <button onClick={noticeSuivante} disabled={estDerniere} title={estDerniere?'Dernière notice de la liste':undefined} className="flex items-center gap-1 text-[#003366] hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed">
-            Notice suivante<ArrowRight className="w-4 h-4"/>
-          </button>
-        </div>
       </div>}
+
+      {/* Raccourcis de sortie, doublant volontairement les contrôles du haut de
+          page : une fois la notice traitée — écarts arbitrés, candidat rattaché,
+          ou recherche manuelle restée vaine — on se trouve ici, en bas d'une page
+          longue. Hors du bloc `hasSudoc` : les notices de catégorie B n'ont pas
+          de bouton de validation mais ont le même besoin de navigation. */}
+      <div className={`${hasSudoc?'mt-3':'mt-8'} flex items-center justify-end gap-4 text-sm`}>
+        <button onClick={()=>setView('DASHBOARD')} className="flex items-center gap-1 text-gray-600 hover:text-[#003366] hover:underline">
+          <ArrowLeft className="w-4 h-4"/>Tableau de bord
+        </button>
+        <span className="text-gray-300" aria-hidden="true">|</span>
+        <button onClick={noticeSuivante} disabled={estDerniere} title={estDerniere?'Dernière notice de la liste':undefined} className="flex items-center gap-1 text-[#003366] hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed">
+          Notice suivante<ArrowRight className="w-4 h-4"/>
+        </button>
+      </div>
     </div>);
   };
 
