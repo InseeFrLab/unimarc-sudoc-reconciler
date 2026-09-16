@@ -146,6 +146,12 @@ export default function App() {
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const [manualCandidate, setManualCandidate] = useState<any>(null);
   const [manualCandidates, setManualCandidates] = useState<any[]>([]);
+  // Formulaire de recherche approfondie. Préremplí depuis la notice Syracuse
+  // (effet plus bas) : on ajuste un critère plutôt que de tout ressaisir.
+  const [manualPpn, setManualPpn] = useState('');
+  const [manualTitle, setManualTitle] = useState('');
+  const [manualAuthor, setManualAuthor] = useState('');
+  const [manualYear, setManualYear] = useState('');
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [aiError, setAiError] = useState<string|null>(null);
   const [llmConfig, setLlmConfig] = useState({
@@ -363,6 +369,15 @@ export default function App() {
   };
 
   useEffect(()=>{if(selectedNoticeId){const r=results.find(x=>x.identifiant===selectedNoticeId);setAiSuggestions(r?.aiSuggestions||[]);setAiError(null);setManualCandidate(null);setManualCandidates([]);}},[selectedNoticeId,results]);
+  // Volontairement indexé sur la seule notice courante, et non sur `results` :
+  // un rafraîchissement des résultats ne doit pas écraser une saisie en cours.
+  useEffect(()=>{
+    const r=results.find(x=>x.identifiant===selectedNoticeId);
+    setManualPpn('');
+    setManualTitle(r?.titre||'');
+    setManualAuthor(r?.syracuse?.['Auteur principal - Personne physique']||r?.syracuse?.['Auteur principal - Collectivité']||'');
+    setManualYear((String(r?.syracuse?.['Publié le']||'').match(/\d{4}/)||[''])[0]);
+  },[selectedNoticeId]);
 
   const renderDetail = () => {
     const idx=results.findIndex(r=>r.identifiant===selectedNoticeId); const rec=results[idx]; if(!rec)return null;
@@ -383,10 +398,24 @@ export default function App() {
       const ppn=padPpn(rawPpn);
       try{const r=await fetch(`api/sudoc/${ppn}`);const d=await r.json();if(d.success)setManualCandidate(d.candidate);else alert(d.error||'Échec');}catch(e){console.error(e);alert('Erreur réseau.');}
     };
-    const handleSearchSru=async(title:string)=>{
-      try{const r=await fetch(`api/sru/search?title=${encodeURIComponent(title)}`);const d=await r.json();if(d.success)setManualCandidates(d.candidates);else alert(d.error||'Échec');}catch(e){console.error(e);alert('Erreur réseau.');}
+    const handleSearchSru=async(title:string,author:string,year:string)=>{
+      const q=`title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&year=${encodeURIComponent(year)}`;
+      try{const r=await fetch(`api/sru/search?${q}`);const d=await r.json();if(d.success){setManualCandidates(d.candidates);if(!d.candidates?.length)alert("Aucun résultat. Essayez avec moins de critères : le titre seul, par exemple.");}else alert(d.error||'Échec');}catch(e){console.error(e);alert('Erreur réseau.');}
     };
-    const handleMarkAbsent=async()=>{try{const r=await fetch(`api/results/${sessionId}/${rec.identifiant}/absent`,{method:'POST'});const d=await r.json();if(d.success)fetchResults(sessionId!, true);}catch(e){console.error(e);}};
+    // Seul gestionnaire qui avalait ses erreurs : un échec (session expirée après
+    // un redémarrage du serveur, par exemple) se traduisait par un clic sans
+    // aucun effet ni message. Aligné sur les autres handlers.
+    const handleMarkAbsent=async()=>{
+      try{
+        const r=await fetch(`api/results/${sessionId}/${rec.identifiant}/absent`,{method:'POST'});
+        const d=await r.json();
+        if(!d.success)return alert(d.error||'Échec du passage en recherche approfondie.');
+        await fetchResults(sessionId!, true);
+        // Le panneau qui remplace la liste des candidats est bien plus court :
+        // sans cela on resterait en bas de page, sans voir ce qui a changé.
+        window.scrollTo({top:0,behavior:'smooth'});
+      }catch(e){console.error(e);alert('Erreur réseau.');}
+    };
     const handleAction=async(champ:string,action:string,val?:string)=>{
       try{
         const r=await fetch(`api/results/${sessionId}/${rec.identifiant}/action`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({champ,action,valeurModifiee:val})});
@@ -425,7 +454,7 @@ export default function App() {
         {candidates.length===1?(<div className="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden mb-6">
           <div className="bg-indigo-50 px-4 py-3 border-b flex flex-wrap justify-between items-center gap-2">
             <span className="font-medium text-indigo-900">Un candidat — PPN {padPpn(candidates[0].ppn)} <a href={sudocUrl(candidates[0].ppn)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline inline-flex items-center gap-1 ml-2">Sudoc<ExternalLink className="w-3 h-3"/></a>{candidates[0].originePiste==='PPN_TRONQUE'&&<span className="ml-2 text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">PPN Syracuse complété d’un zéro</span>}</span>
-            <div className="flex gap-2"><button onClick={()=>handleRattacher(candidates[0].ppn)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 font-medium">✓ Rattacher</button><button onClick={handleMarkAbsent} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">✗ Pas la bonne</button></div>
+            <div className="flex gap-2"><button onClick={()=>handleRattacher(candidates[0].ppn)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 font-medium">✓ Rattacher</button><button onClick={handleMarkAbsent} title="Saisir soi-même les critères de recherche, ou un PPN connu" className="px-4 py-2 bg-white border rounded-lg text-sm hover:bg-gray-50">🔍 Recherche approfondie</button></div>
           </div>
           <div className="p-4"><FullCompareTable record={rec} candidate={candidates[0]}/></div>
         </div>):candidates.length>1?(<div className="space-y-6">
@@ -437,32 +466,58 @@ export default function App() {
             <div className="p-4"><FullCompareTable record={rec} candidate={c}/></div>
           </div>))}
           {candidates.length>10&&<p className="text-sm text-gray-500 italic">10 premiers sur {candidates.length}.</p>}
-          <button onClick={handleMarkAbsent} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Aucun ne correspond</button>
-        </div>):(<div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg"><p className="font-medium">⏳ Aucun candidat disponible.</p><p className="text-sm mt-1">Vérifiez que le backend retourne <code className="bg-yellow-100 px-1 rounded">sruCandidates</code>.</p></div>)}
+          <div className="flex flex-wrap items-center gap-3">
+            <button onClick={handleMarkAbsent} className="px-4 py-2 bg-white border rounded-lg text-sm hover:bg-gray-50 flex-shrink-0">🔍 Recherche approfondie</button>
+            <span className="text-sm text-gray-500">Aucun de ces candidats ne convient ? Cherchez par PPN, ou par titre, auteur et année.</span>
+          </div>
+        </div>):(<div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-4 rounded-lg">
+          <p className="font-medium">Aucun candidat trouvé dans le Sudoc.</p>
+          <p className="text-sm mt-1">La recherche automatique, faite sur le titre, l'auteur et l'année de la notice Syracuse, n'a rien remonté.</p>
+          <button onClick={handleMarkAbsent} className="mt-3 px-4 py-2 bg-white border border-yellow-300 rounded-lg text-sm hover:bg-yellow-100">🔍 Recherche approfondie</button>
+        </div>)}
       </div>)}
 
       {isAbsent&&<div className="space-y-6">
         <div className="bg-gray-100 border text-gray-700 px-4 py-4 rounded-lg">
-          <div className="flex items-center gap-2 mb-3"><XCircle className="w-5 h-5 text-gray-500"/>Aucune notice trouvée. Conservée telle quelle.</div>
+          <div className="flex items-start gap-2 mb-3"><Search className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"/><span><span className="font-medium">Recherche approfondie.</span> Aucun rattachement pour le moment : faute d'en choisir un, la notice sera exportée telle quelle.</span></div>
           
           <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-gray-200">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium w-48">Recherche par PPN :</span>
-              <input type="text" placeholder="PPN Sudoc..." className="px-3 py-1.5 border rounded text-sm w-48" id="manual-ppn-input" />
-              <button onClick={() => {
-                const val = (document.getElementById('manual-ppn-input') as HTMLInputElement).value;
-                if (val) handleFetchSudoc(val);
-              }} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm hover:bg-indigo-200">Récupérer notice</button>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="text-sm font-medium w-44" htmlFor="manual-ppn-input">Recherche par PPN :</label>
+              <input id="manual-ppn-input" type="text" placeholder="PPN Sudoc…" value={manualPpn}
+                onChange={e=>setManualPpn(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'&&manualPpn.trim())handleFetchSudoc(manualPpn.trim());}}
+                className="px-3 py-1.5 border rounded text-sm w-48"/>
+              <button onClick={()=>{if(manualPpn.trim())handleFetchSudoc(manualPpn.trim());}} disabled={!manualPpn.trim()}
+                className="px-3 py-1.5 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed">Récupérer la notice</button>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium w-48">Recherche par titre :</span>
-              <input type="text" placeholder="Titre..." className="px-3 py-1.5 border rounded text-sm w-64" id="manual-title-input" />
-              <button onClick={() => {
-                const val = (document.getElementById('manual-title-input') as HTMLInputElement).value;
-                if (val) handleSearchSru(val);
-              }} className="px-3 py-1.5 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm hover:bg-indigo-200">Rechercher candidats</button>
+
+            <div className="flex flex-wrap items-start gap-3">
+              <span className="text-sm font-medium w-44 pt-1.5">Recherche par critères :</span>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500" htmlFor="manual-title-input">Titre</label>
+                  <input id="manual-title-input" type="text" placeholder="Titre…" value={manualTitle}
+                    onChange={e=>setManualTitle(e.target.value)} className="px-3 py-1.5 border rounded text-sm w-64"/>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500" htmlFor="manual-author-input">Auteur</label>
+                  <input id="manual-author-input" type="text" placeholder="Nom ou collectivité…" value={manualAuthor}
+                    onChange={e=>setManualAuthor(e.target.value)} className="px-3 py-1.5 border rounded text-sm w-52"/>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500" htmlFor="manual-year-input">Année</label>
+                  <input id="manual-year-input" type="text" inputMode="numeric" placeholder="AAAA" value={manualYear}
+                    onChange={e=>setManualYear(e.target.value)} className="px-3 py-1.5 border rounded text-sm w-24"/>
+                </div>
+                <button onClick={()=>{if(manualTitle.trim())handleSearchSru(manualTitle.trim(),manualAuthor.trim(),manualYear.trim());}} disabled={!manualTitle.trim()}
+                  className="px-3 py-1.5 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed">Rechercher des candidats</button>
+              </div>
             </div>
+            <p className="text-xs text-gray-500 ml-44 -mt-1">
+              Préremplis depuis la notice Syracuse. Le titre est obligatoire ; auteur et année
+              affinent la recherche, et sont abandonnés d'eux-mêmes si la requête ne donne rien.
+            </p>
           </div>
         </div>
 

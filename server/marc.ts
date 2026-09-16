@@ -336,6 +336,41 @@ export function parseSruResponse(xmlString: string) {
   return { count, candidates };
 }
 
+/**
+ * Réduit un titre aux mots significatifs attendus par l'index `mti` du SRU :
+ * ponctuation retirée, mots vides et mots courts écartés, cinq mots au plus,
+ * joints par `+`. Utilisé par la recherche automatique comme par la recherche
+ * approfondie saisie à la main, pour que les deux se comportent pareil.
+ */
+export function motsTitreSru(titre: string): string {
+  return String(titre || '')
+    .replace(/[:\-\.,;!?'"()]/g, ' ')
+    .split(/\s+/)
+    .filter((w: string) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()))
+    .slice(0, 5)
+    .join('+');
+}
+
+/**
+ * Réduit une mention d'auteur saisie librement à ce qu'attend l'index `aut` :
+ * deux mots significatifs au plus. Convient aussi bien à « Martin, Paul » qu'à
+ * un nom de collectivité. La recherche automatique, elle, garde sa propre règle
+ * (cf. buildSruQuery), qui distingue personne physique et collectivité.
+ */
+export function nomAuteurSru(auteur: string): string {
+  return String(auteur || '')
+    .replace(/[:\-\.,;!?'"()]/g, ' ')
+    .split(/\s+/)
+    .filter((w: string) => w.length > 2)
+    .slice(0, 2)
+    .join('+');
+}
+
+/** Extrait le millésime sur 4 chiffres attendu par l'index `apu`. */
+export function anneeSru(publieLe: string): string {
+  return (String(publieLe || '').match(/\d{4}/) || [''])[0];
+}
+
 export function buildSruQuery(notice: any) {
   const titre = notice['Titre'] || '';
   const auteurPP = notice['Auteur principal - Personne physique'] || '';
@@ -343,13 +378,8 @@ export function buildSruQuery(notice: any) {
   const auteurColl = notice['Auteur principal - Collectivité'] || '';
   // Année « exacte » : le champ Syracuse peut contenir « C 2022 » (copyright) ou
   // « 2022, cop. 2021 ». Le SRU attend 4 chiffres et rien d'autre.
-  const annee = (String(notice['Publié le'] || '').match(/\d{4}/) || [''])[0];
-  const motsTitre = titre
-    .replace(/[:\-\.,;!?'"()]/g, ' ')
-    .split(/\s+/)
-    .filter((w: string) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()))
-    .slice(0, 5)
-    .join('+');
+  const annee = anneeSru(notice['Publié le']);
+  const motsTitre = motsTitreSru(titre);
   let nomAuteur = '';
   if (auteurPP) {
     nomAuteur = auteurPP.split(/[,\s]+/)[0];
