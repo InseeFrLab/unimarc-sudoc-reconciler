@@ -7,7 +7,9 @@
 # Ne demande que des droits de LECTURE sur Kubernetes : utilisable depuis
 # un service VSCode du SSP Cloud lancé avec le rôle par défaut.
 #
-# Détail pédagogique de chaque étape : voir apprendre.md.
+# Si le site est périmé, le remède est le bouton « Restart » sur le Deployment
+# dans l'interface ArgoCD : l'image est publiée sous l'étiquette mouvante
+# `latest`, qu'ArgoCD ne surveille pas. Détail pédagogique : voir apprendre.md.
 # ─────────────────────────────────────────────────────────────
 set -uo pipefail
 
@@ -15,9 +17,10 @@ APP=unimarc-sudoc-reconciler
 REPO=inseefrlab/unimarc-sudoc-reconciler
 SITE=https://unimarc-sudoc-reconciler.lab.sspcloud.fr
 
-# Fichiers dont une modification justifie de reconstruire l'image. Un commit
-# qui ne touche que la doc ou deploy/ ne change pas l'applicatif : le SHA
-# épinglé a alors le droit d'être en retard sur HEAD.
+# Fichiers dont une modification change ce que fait le site. Un commit qui ne
+# touche que la doc ou deploy/ produit une image au comportement identique :
+# le site a donc le droit de déclarer un commit antérieur à HEAD sans être
+# pour autant périmé. C'est à ces chemins-là qu'on le compare.
 CHEMINS_APPLICATIFS=(src server package.json package-lock.json Dockerfile vite.config.ts)
 
 git fetch -q origin
@@ -64,24 +67,36 @@ ligne "commit déclaré par le site"   "${COMMIT_SITE:0:12}"
 ligne "âge du pod"                   "$AGE_POD"
 echo
 
-# Verdicts. Attention : les deux premiers peuvent être ✓ alors que le site
-# est périmé, si le manifeste utilise un tag mouvant comme « latest ».
+# Verdicts. Attention : les deux premiers peuvent être ✓ alors que le site est
+# périmé — c'est le propre d'une étiquette mouvante comme `latest`, qu'ArgoCD
+# ne surveille pas. Le verdict qui tranche est le troisième.
 [ -n "$TAG_GIT" ] && [ "$TAG_GIT" = "$TAG_CLUSTER" ] \
   && echo "  ✓ ArgoCD a bien appliqué le manifeste de main." \
   || echo "  ✗ ArgoCD n'a pas appliqué le manifeste de main (synchronisation en attente ?)."
 
-[ -n "$DIGEST_POD" ] && [ "$DIGEST_POD" = "$DIGEST_ATTENDU" ] \
-  && echo "  ✓ Le pod exécute bien l'image que ce tag désigne." \
-  || echo "  ✗ Le pod exécute une AUTRE image : il n'a pas redémarré depuis que le tag a bougé."
+if [ -n "$DIGEST_POD" ] && [ "$DIGEST_POD" = "$DIGEST_ATTENDU" ]; then
+  echo "  ✓ Le pod exécute bien l'image que « ${TAG_GIT:0:12} » désigne aujourd’hui."
+else
+  echo "  ✗ Le pod exécute une AUTRE image : « ${TAG_GIT:0:12} » a bougé depuis qu'il a démarré."
+fi
 
 if [ -z "$COMMIT_SITE" ]; then
-  echo "  ⚠ Le site ne répond pas sur /api/version (version antérieure, ou site injoignable)."
+  echo "  ⚠ Le site ne répond pas sur /api/version (version antérieure à cette route, ou site injoignable)."
 elif [ "$COMMIT_SITE" = "$DERNIER_CODE" ]; then
   echo "  ✓ Le site exécute le dernier code applicatif de main."
 else
   echo "  ✗ Le site exécute ${COMMIT_SITE:0:12}, or le dernier code applicatif est ${DERNIER_CODE:0:12}."
 fi
 
-[ "$TAG_GIT" = "$DERNIER_CODE" ] \
-  || echo "  ⚠ Le manifeste n'épingle pas le dernier commit applicatif (${DERNIER_CODE:0:12})."
+# Remède, affiché seulement s'il y a lieu.
+PERIME=non
+[ -n "$DIGEST_POD" ] && [ "$DIGEST_POD" != "$DIGEST_ATTENDU" ] && PERIME=oui
+[ -n "$COMMIT_SITE" ] && [ "$COMMIT_SITE" != "$DERNIER_CODE" ] && PERIME=oui
+if [ "$PERIME" = "oui" ]; then
+  echo
+  echo "  → Pour déployer : interface ArgoCD, application « $APP »,"
+  echo "    ressource Deployment, bouton « Restart ». Le pod est recréé et"
+  echo "    retélécharge l'image. Attention : les sessions de vérification"
+  echo "    en cours seront perdues (l'application n'a aucune persistance)."
+fi
 echo

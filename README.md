@@ -263,59 +263,93 @@ Procédure, à faire une fois :
 
 ### Mettre en production une nouvelle version
 
-L'image est **épinglée par le SHA du commit** dans `deploy/deployment.yaml`, et non
-par un tag `:latest`. La raison : ArgoCD compare le *texte* des fichiers de
-`deploy/` à l'état du cluster. Un tag mouvant ne change jamais ce texte, donc
-ArgoCD ne voit rien à faire et le pod continue de tourner avec l'image téléchargée
-à son démarrage. Épingler le SHA fait de chaque mise en production un commit, que
-ArgoCD applique de lui-même.
-
 1. Fusionner la PR sur `main` et attendre que
    [.github/workflows/build-push.yml](.github/workflows/build-push.yml) ait publié
    l'image (onglet *Actions* du dépôt).
-2. Relever le SHA du commit dont on veut l'image — `git rev-parse origin/main`, ou
-   le SHA du commit de merge sur GitHub. Le workflow publie un tag par commit, en
-   plus de `:latest`.
-3. Reporter ce SHA dans le champ `image:` de `deploy/deployment.yaml`, puis pousser
-   sur `main`. ArgoCD détecte le changement et redéploie seul, en une minute ou
-   deux.
-4. Contrôler, avec `./scripts/verifier-deploiement.sh` : les quatre verdicts
-   doivent passer au ✓. Le contrôle le plus direct est celui de la dernière
-   ligne — l'application déclare elle-même sur quel commit elle a été construite :
+2. Dans l'interface **ArgoCD**, ouvrir l'application `unimarc-sudoc-reconciler`,
+   sélectionner la ressource `Deployment` et cliquer sur **Restart**. Le pod est
+   détruit et recréé ; le nouveau retélécharge l'image publiée sous `latest`.
+3. Contrôler avec [`scripts/verifier-deploiement.sh`](scripts/verifier-deploiement.sh).
 
-   ```
-   curl -s https://unimarc-sudoc-reconciler.lab.sspcloud.fr/api/version
-   {"version":"1.4.0","commit":"e48dca6cfb…","source":"image","demarrage":"…"}
-   ```
+Le redémarrage est **volontairement manuel**. Déployer recrée le conteneur, et
+l'application n'a aucune persistance : les sessions de vérification en cours sont
+perdues. Un déploiement automatique pourrait tomber pendant qu'une documentaliste
+traite plusieurs centaines de notices. Mieux vaut choisir son moment.
 
-   Ce SHA est gravé dans l'image à sa construction (`build-args: GIT_SHA` dans le
-   workflow → `ARG`/`ENV` dans le `Dockerfile` → [server/version.ts](server/version.ts)),
-   il ne peut donc pas mentir. Tout le mécanisme est expliqué pas à pas dans
-   [apprendre.md](apprendre.md).
+> Le bouton se trouve dans ArgoCD et non dans un terminal parce qu'ArgoCD agit
+> avec **ses** permissions : `kubectl rollout restart` échoue depuis un service
+> VSCode du SSP Cloud, lancé par défaut avec un rôle en lecture seule. (Pour
+> obtenir ce droit malgré tout : relancer le service avec le rôle `admin`, ou
+> récupérer son kubeconfig personnel depuis la page *Mon compte* d'Onyxia.)
 
-   Note : un changement **applicatif** demande deux commits, puisqu'on ne connaît
-   le SHA qu'une fois le merge fait. Fusionner d'abord la PR, laisser le workflow
-   publier l'image, puis pousser sur `main` un second commit qui reporte le SHA du
-   commit de merge dans `deploy/deployment.yaml`.
+#### Pourquoi ce redémarrage est nécessaire
 
-Quelques conséquences utiles :
+C'est le piège principal de ce déploiement, et il a déjà coûté trois semaines de
+site périmé : **rien ne signale qu'un redémarrage est dû.**
 
-- **Aucun droit d'écriture sur Kubernetes n'est nécessaire.** C'est ArgoCD qui
-  applique les manifestes ; un `git push` suffit. Les services VSCode du SSP Cloud
-  sont lancés par défaut avec un rôle en lecture seule, et `kubectl rollout
-  restart` y échoue — sans conséquence ici. (Pour l'obtenir malgré tout : relancer
-  le service avec le rôle `admin`, ou récupérer son kubeconfig personnel depuis la
-  page *Mon compte* d'Onyxia.)
-- **Le dépôt dit ce qui tourne.** Plus besoin d'interroger le registre pour savoir
-  quelle version est en ligne.
-- **Le retour arrière est trivial** : remettre le SHA précédent et pousser.
-- Quand le commit de mise en production ne touche que `deploy/` ou la
-  documentation, le SHA épinglé reste celui du commit applicatif précédent. C'est
-  normal : l'image est identique, seul le manifeste a changé.
-- Pour rendre le déploiement automatique à chaque merge, il faudrait ArgoCD Image
-  Updater ou une étape du workflow qui réécrit ce SHA. Tant que les mises en
-  production sont occasionnelles et décidées, l'édition à la main reste la plus
-  lisible.
+`latest` est une étiquette *mouvante* : le workflow la décolle de l'ancienne image
+pour la recoller sur la neuve à chaque push sur `main`. Or ArgoCD compare le
+*texte* des manifestes de `deploy/` à l'état du cluster — et ce texte, lui, n'a pas
+changé d'un caractère. ArgoCD affiche donc **Synced**, à juste titre : sa mission
+est de faire coïncider le cluster avec les manifestes, pas de surveiller le
+registre d'images. Et un pod ne retélécharge son image **qu'à son démarrage**.
+Résultat : deux PR ont pu être fusionnées sans jamais atteindre le site, sans
+qu'aucun voyant ne passe au rouge.
+
+D'où l'importance de l'étape 3 : la vérification n'est pas une formalité, c'est le
+seul garde-fou.
+
+Deux limites assumées de ce choix :
+
+- **Pas de retour arrière possible.** `latest` ne désigne que l'image la plus
+  récente ; on ne peut pas lui demander la précédente. Corriger une régression
+  suppose de corriger le code, d'attendre la reconstruction, puis de redémarrer.
+- **Le dépôt ne dit pas quelle version tourne.** Seul `/api/version` le sait.
+
+L'alternative serait d'épingler dans le manifeste le tag portant le SHA du commit,
+que le workflow publie déjà à côté de `latest` : ArgoCD verrait alors le fichier
+changer et déploierait seul, le retour arrière ne serait qu'un SHA à remettre.
+Écarté volontairement — cela impose de reporter un SHA à chaque mise en
+production, pour un outil interne où le redémarrage manuel reste acceptable.
+
+#### Vérifier qu'un déploiement a bien pris
+
+[`scripts/verifier-deploiement.sh`](scripts/verifier-deploiement.sh) recoupe quatre
+sources — le manifeste sur `main`, ce qu'ArgoCD a appliqué, l'empreinte de l'image
+réellement chargée par le pod, et ce que le site déclare — puis rend un verdict et
+rappelle le remède s'il y a lieu. Il ne demande que des droits de lecture.
+
+```
+  tag demandé par le manifeste      latest
+  tag appliqué dans le cluster      latest
+  image attendue (registre)         sha256:7a33e9fb     ← ce que « latest » désigne
+  image réellement exécutée         sha256:423c98b5     ← ce que le pod a chargé
+  commit déclaré par le site        5d6e4e28c892
+  âge du pod                        23d
+
+  ✓ ArgoCD a bien appliqué le manifeste de main.
+  ✗ Le pod exécute une AUTRE image : « latest » a bougé depuis qu'il a démarré.
+```
+
+Noter les deux premières lignes identiques et les deux suivantes différentes :
+c'est exactement la signature du piège décrit plus haut. Comparer des tags ne sert
+à rien, il faut comparer des **empreintes**.
+
+Le contrôle le plus direct reste le dernier : l'application déclare elle-même sur
+quel commit elle a été construite.
+
+```
+curl -s https://unimarc-sudoc-reconciler.lab.sspcloud.fr/api/version
+{"version":"1.4.0","commit":"e48dca6cfb…","source":"image","demarrage":"…"}
+```
+
+Ce SHA est gravé dans l'image à sa construction (`build-args: GIT_SHA` dans le
+workflow → `ARG`/`ENV` dans le [Dockerfile](Dockerfile) →
+[server/version.ts](server/version.ts)) : la réponse vient du code en train de
+s'exécuter, elle ne peut donc pas mentir.
+
+Tout le mécanisme — image, tag, registre, empreinte, manifeste, pod, ArgoCD — est
+expliqué de zéro dans [apprendre.md](apprendre.md).
 
 Contraintes réseau, vérifiées : sortie HTTPS vers `www.sudoc.fr`,
 `www.sudoc.abes.fr` et `llm.lab.sspcloud.fr` ✓ ; entrée HTTPS via l'ingress

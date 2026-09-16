@@ -245,19 +245,66 @@ n'est ni dans ArgoCD ni dans Kubernetes : il est dans le fait d'avoir exprimé
 l'état souhaité avec une étiquette mouvante. Dire « je veux la dernière image »
 n'est pas un état, c'est une promesse creuse.
 
-**La correction** consiste à écrire le tag de commit dans le manifeste :
+**Ce qui manquait**, c'est simplement de recréer le pod. Détruit, il est aussitôt
+remplacé par le `Deployment`, et le nouveau retélécharge l'image que `:latest`
+désigne à cet instant. En temps normal on écrirait :
+
+```bash
+kubectl rollout restart deployment/unimarc-sudoc-reconciler
+```
+
+Mais un service VSCode du SSP Cloud est lancé avec un rôle en **lecture seule**,
+et la commande échoue :
+
+```
+error: failed to patch: deployments.apps "…" is forbidden: User
+"system:serviceaccount:user-mhillion:vscode-python-…" cannot patch resource
+"deployments" in API group "apps" in the namespace "user-mhillion"
+```
+
+D'où le geste retenu pour ce projet : **le bouton *Restart*** sur la ressource
+`Deployment`, dans l'interface ArgoCD. Même effet, mais c'est ArgoCD qui agit,
+avec ses propres permissions — vos droits de lecture suffisent.
+
+Notez au passage le rôle d'`imagePullPolicy: Always` dans le manifeste. Il
+signifie « retélécharge l'image à chaque **démarrage** de conteneur » — et non
+« surveille le registre en continu », ce qui n'existe pas. Avec une étiquette
+mouvante il est indispensable : sans lui, un pod recréé pourrait réutiliser
+l'image déjà en cache sur la machine, et le redémarrage ne servirait à rien.
+
+### Le choix fait ici, et ce qu'il coûte
+
+Il existe une autre façon de procéder : **épingler dans le manifeste le tag
+portant le SHA du commit**, que le workflow publie déjà à côté de `:latest`.
 
 ```yaml
 image: ghcr.io/inseefrlab/unimarc-sudoc-reconciler:e48dca6cfb0752a71c…
 ```
 
-Dès lors, chaque mise en production **modifie le fichier**. ArgoCD voit la
-différence, applique le nouveau manifeste, Kubernetes constate que le Pod ne
-correspond plus à la description et le recrée — donc retélécharge l'image. La
-chaîne se remet à fonctionner de bout en bout, sans intervention manuelle et sans
-droits particuliers.
+Chaque mise en production modifierait alors le *fichier*. ArgoCD verrait la
+différence, appliquerait le manifeste, et Kubernetes recréerait le pod de
+lui-même : plus de geste manuel, et le retour arrière se réduirait à remettre le
+SHA précédent. C'est ce que recommande en général la pratique GitOps.
 
----
+Ce projet a délibérément gardé `:latest` et le redémarrage manuel, pour deux
+raisons :
+
+1. **Simplicité.** Épingler impose de reporter un SHA à chaque mise en
+   production, ou d'écrire un automate qui le fait. Pour un outil interne déployé
+   quelques fois par an, c'est de la machinerie mal amortie.
+2. **Maîtrise du moment.** Un déploiement recrée le conteneur, et l'application
+   n'a **aucune persistance** : les sessions de vérification en cours sont
+   perdues. Un déploiement automatique pourrait interrompre une documentaliste au
+   milieu de 800 notices. Le bouton laisse choisir l'instant.
+
+Les deux contreparties, à connaître :
+
+- **Aucun retour arrière.** `:latest` ne désigne que l'image la plus récente ; on
+  ne peut pas lui demander la précédente. Réparer une régression suppose de
+  corriger le code, d'attendre la reconstruction, puis de redémarrer.
+- **Rien ne signale qu'un redémarrage est dû.** C'est la faiblesse qui a produit
+  les trois semaines de site périmé. Le seul garde-fou est de vérifier — d'où le
+  script de la section suivante, à lancer après chaque mise en production.
 
 ## 5. Ce que vérifie le script, ligne par ligne
 
@@ -364,26 +411,26 @@ comparer au dernier commit applicatif de `main`.
 ```
   origin/main (HEAD)                b07217a3a967     ← dernier commit de main
   dernier commit applicatif         a9d5687f5a72     ← dernier commit qui change le site
-  tag demandé par le manifeste      e48dca6cfb07     ← état souhaité (Git)
-  tag appliqué dans le cluster      e48dca6cfb07     ← ce qu'ArgoCD a posé
-  image attendue (registre)         sha256:7a33e9fb  ← ce que ce tag désigne
-  image réellement exécutée         sha256:7a33e9fb  ← ce que le conteneur charge
+  tag demandé par le manifeste      latest           ← état souhaité (Git)
+  tag appliqué dans le cluster      latest           ← ce qu'ArgoCD a posé
+  image attendue (registre)         sha256:7a33e9fb  ← ce que « latest » désigne
+  image réellement exécutée         sha256:7a33e9fb  ← ce que le conteneur a chargé
   commit déclaré par le site        a9d5687f5a72     ← ce que l'appli avoue
   âge du pod                        2m
 ```
 
-Les cas de figure les plus courants :
+Avec une étiquette mouvante, les deux premières lignes de tags sont **toujours**
+identiques : elles ne prouvent rien. Ce sont les lignes 5 et 6, les empreintes,
+puis la ligne 7, qui tranchent.
 
 | Symptôme | Interprétation |
 | --- | --- |
 | Tous les verdicts ✓ | Le site est à jour. |
-| Tags identiques mais empreintes différentes | Le tag a bougé sans que le Pod redémarre. C'est le bug de `:latest`. |
+| Tags identiques, empreintes différentes | `latest` a bougé sans que le pod redémarre : cliquer sur *Restart* dans ArgoCD. |
+| Le site déclare un commit plus ancien que le dernier commit applicatif | Même chose, constaté depuis l'application elle-même. |
 | Tag du manifeste ≠ tag du cluster, pod récent | ArgoCD n'a pas fini son cycle. Attendre deux ou trois minutes. |
 | Tag du manifeste ≠ tag du cluster, pod ancien | La synchronisation échoue. Regarder l'interface ArgoCD. |
 | `/api/version` indisponible | Le site tourne sur une version antérieure à cette route, ou est injoignable. |
-| ⚠ le manifeste n'épingle pas le dernier commit applicatif | Une version applicative est commitée mais pas déployée : reporter le SHA dans le manifeste. |
-
----
 
 ## 7. Mémo des commandes
 
@@ -413,7 +460,7 @@ kubectl auth can-i --list
 kubectl auth can-i patch deployments
 ```
 
-Pour **mettre en production**, voir la procédure du
-[README](README.md#mettre-en-production-une-nouvelle-version). En une phrase :
-reporter le SHA du commit dans `deploy/deployment.yaml`, pousser, et laisser
-ArgoCD faire.
+Pour **mettre en production** : fusionner la PR, attendre que le workflow ait
+publié l'image, puis cliquer sur *Restart* sur le `Deployment` dans l'interface
+ArgoCD — et vérifier avec le script. Procédure détaillée dans le
+[README](README.md#mettre-en-production-une-nouvelle-version).

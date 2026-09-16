@@ -113,11 +113,17 @@ justification : [docs/metier-unimarc-sudoc.md](docs/metier-unimarc-sudoc.md).
   `test/fixtures/`. Toute règle métier touchée doit y gagner un cas.
 - Une recette manuelle reste nécessaire pour l'interface et les appels réseau
   réels (voir README).
-- **Image déployée épinglée par SHA de commit** dans `deploy/deployment.yaml`, pas
-  `:latest`. ArgoCD compare le texte des manifestes : avec un tag mouvant il ne
-  voit jamais rien changer, et la nouvelle image n'est jamais déployée. Mettre en
-  production = reporter le SHA dans ce fichier et pousser. Ne pas revenir à un tag
-  mouvant ; procédure détaillée dans le [README](README.md#mettre-en-production-une-nouvelle-version).
+- **Mise en production manuelle**, par le bouton *Restart* du Deployment dans
+  l'interface ArgoCD. L'image est publiée sous l'étiquette mouvante `latest`, qu'
+  ArgoCD ne surveille pas : il compare le texte des manifestes, qui ne change
+  jamais. Rien ne signale donc qu'un redémarrage est dû — c'est le piège de ce
+  déploiement, il a déjà laissé deux PR fusionnées hors ligne. Le caractère
+  manuel est assumé : un redémarrage efface les sessions en cours (aucune
+  persistance). Procédure : [README](README.md#mettre-en-production-une-nouvelle-version).
+- **Ne pas retirer `imagePullPolicy: Always`** de `deploy/deployment.yaml` : avec
+  un tag mouvant, c'est lui qui garantit qu'un pod recréé retélécharge l'image au
+  lieu de réutiliser celle déjà présente sur le nœud. Sans lui, le bouton
+  *Restart* peut ne rien changer.
 - **Vérifier un déploiement** : `./scripts/verifier-deploiement.sh` (droits de
   lecture suffisants). La preuve directe est `GET /api/version`, qui renvoie le SHA
   gravé dans l'image. Si la chaîne `build-args: GIT_SHA` → `ARG`/`ENV` du
@@ -162,6 +168,11 @@ Incohérences résiduelles, non corrigées, à connaître avant de toucher au co
   PMB introuvable » pour une notice. Le front les distingue en testant
   `categorie === 'B'`. Fragile.
 - Seul `Session` est typé ; `notices`, `results` et `ecarts` sont des `any[]`.
+- `deploy/deployment.yaml` référence l'image `:latest`, donc ArgoCD ne redéploie
+  jamais de lui-même : la mise en production passe par un *Restart* manuel, et
+  aucun retour arrière n'est possible (le tag ne désigne que l'image la plus
+  récente). Choix assumé plutôt qu'oubli — épingler le tag par SHA de commit
+  lèverait les deux limites, au prix d'un SHA à reporter à chaque déploiement.
 
 ## Pistes d'amélioration
 
