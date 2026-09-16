@@ -112,6 +112,11 @@ justification : [docs/metier-unimarc-sudoc.md](docs/metier-unimarc-sudoc.md).
   `test/fixtures/`. Toute règle métier touchée doit y gagner un cas.
 - Une recette manuelle reste nécessaire pour l'interface et les appels réseau
   réels (voir README).
+- **Image déployée épinglée par SHA de commit** dans `deploy/deployment.yaml`, pas
+  `:latest`. ArgoCD compare le texte des manifestes : avec un tag mouvant il ne
+  voit jamais rien changer, et la nouvelle image n'est jamais déployée. Mettre en
+  production = reporter le SHA dans ce fichier et pousser. Ne pas revenir à un tag
+  mouvant ; procédure détaillée dans le [README](README.md#mettre-en-production-une-nouvelle-version).
 
 ## Pièges connus
 
@@ -148,10 +153,6 @@ Incohérences résiduelles, non corrigées, à connaître avant de toucher au co
   PMB introuvable » pour une notice. Le front les distingue en testant
   `categorie === 'B'`. Fragile.
 - Seul `Session` est typé ; `notices`, `results` et `ecarts` sont des `any[]`.
-- `deploy/deployment.yaml` référence l'image `:latest` : ArgoCD ne voit donc rien
-  changer quand une nouvelle image est poussée, d'où le `kubectl rollout restart`
-  de la procédure. Épingler le tag par SHA rendrait le déploiement réellement
-  GitOps.
 
 ## Pistes d'amélioration
 

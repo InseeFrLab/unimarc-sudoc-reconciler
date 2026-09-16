@@ -241,8 +241,10 @@ Procédure, à faire une fois :
 
 1. **Vérifier l'image.** Un push sur `main` déclenche
    [.github/workflows/build-push.yml](.github/workflows/build-push.yml), qui publie
-   `ghcr.io/<propriétaire>/<dépôt>:latest` (et un tag par commit). Le paquet GHCR
-   doit être **public**, sinon il faut ajouter un `imagePullSecret` au Deployment.
+   `ghcr.io/<propriétaire>/<dépôt>:latest` **et un tag par commit** — c'est ce
+   dernier qui est référencé dans `deploy/deployment.yaml` (voir « Mettre en
+   production une nouvelle version »). Le paquet GHCR doit être **public**, sinon
+   il faut ajouter un `imagePullSecret` au Deployment.
 2. **Adapter les manifestes.** Dans `deploy/*.yaml` et `application.yaml`, remplacer
    le namespace `user-mhillion` par le vôtre, ajuster l'image dans
    `deploy/deployment.yaml` et le `host` dans `deploy/ingress.yaml`. Les points à
@@ -252,9 +254,47 @@ Procédure, à faire une fois :
    `kubectl apply -f application.yaml`. Ce fichier dit à ArgoCD quel dépôt et quel
    dossier surveiller ; `prune` et `selfHeal` sont activés.
 5. Ensuite, tout passe par Git : ArgoCD resynchronise à chaque changement de
-   `deploy/`. Pour déployer une nouvelle image `:latest`, redémarrer le déploiement
-   (`kubectl rollout restart deployment/unimarc-sudoc-reconciler`) ou pousser un
-   changement de tag.
+   `deploy/`. Voir ci-dessous pour mettre en production une nouvelle version.
+
+### Mettre en production une nouvelle version
+
+L'image est **épinglée par le SHA du commit** dans `deploy/deployment.yaml`, et non
+par un tag `:latest`. La raison : ArgoCD compare le *texte* des fichiers de
+`deploy/` à l'état du cluster. Un tag mouvant ne change jamais ce texte, donc
+ArgoCD ne voit rien à faire et le pod continue de tourner avec l'image téléchargée
+à son démarrage. Épingler le SHA fait de chaque mise en production un commit, que
+ArgoCD applique de lui-même.
+
+1. Fusionner la PR sur `main` et attendre que
+   [.github/workflows/build-push.yml](.github/workflows/build-push.yml) ait publié
+   l'image (onglet *Actions* du dépôt).
+2. Relever le SHA du commit dont on veut l'image — `git rev-parse origin/main`, ou
+   le SHA du commit de merge sur GitHub. Le workflow publie un tag par commit, en
+   plus de `:latest`.
+3. Reporter ce SHA dans le champ `image:` de `deploy/deployment.yaml`, puis pousser
+   sur `main`. ArgoCD détecte le changement et redéploie seul, en une minute ou
+   deux.
+4. Contrôler : `kubectl get pods -l app=unimarc-sudoc-reconciler` doit montrer un
+   pod fraîchement créé.
+
+Quelques conséquences utiles :
+
+- **Aucun droit d'écriture sur Kubernetes n'est nécessaire.** C'est ArgoCD qui
+  applique les manifestes ; un `git push` suffit. Les services VSCode du SSP Cloud
+  sont lancés par défaut avec un rôle en lecture seule, et `kubectl rollout
+  restart` y échoue — sans conséquence ici. (Pour l'obtenir malgré tout : relancer
+  le service avec le rôle `admin`, ou récupérer son kubeconfig personnel depuis la
+  page *Mon compte* d'Onyxia.)
+- **Le dépôt dit ce qui tourne.** Plus besoin d'interroger le registre pour savoir
+  quelle version est en ligne.
+- **Le retour arrière est trivial** : remettre le SHA précédent et pousser.
+- Quand le commit de mise en production ne touche que `deploy/` ou la
+  documentation, le SHA épinglé reste celui du commit applicatif précédent. C'est
+  normal : l'image est identique, seul le manifeste a changé.
+- Pour rendre le déploiement automatique à chaque merge, il faudrait ArgoCD Image
+  Updater ou une étape du workflow qui réécrit ce SHA. Tant que les mises en
+  production sont occasionnelles et décidées, l'édition à la main reste la plus
+  lisible.
 
 Contraintes réseau, vérifiées : sortie HTTPS vers `www.sudoc.fr`,
 `www.sudoc.abes.fr` et `llm.lab.sspcloud.fr` ✓ ; entrée HTTPS via l'ingress
