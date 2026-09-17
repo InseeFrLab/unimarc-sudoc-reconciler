@@ -80,23 +80,35 @@ else
   echo "  ✗ Le pod exécute une AUTRE image : « ${TAG_GIT:0:12} » a bougé depuis qu'il a démarré."
 fi
 
+# On teste l'ASCENDANCE, pas l'égalité : l'image est construite sur HEAD de main,
+# qui peut être en avance de quelques commits de documentation sur le dernier
+# commit applicatif. Le site est à jour dès lors qu'il contient ce dernier —
+# une égalité stricte criait au retard sans raison.
+SITE_A_JOUR=non
 if [ -z "$COMMIT_SITE" ]; then
   echo "  ⚠ Le site ne répond pas sur /api/version (version antérieure à cette route, ou site injoignable)."
-elif [ "$COMMIT_SITE" = "$DERNIER_CODE" ]; then
+elif ! git cat-file -e "${COMMIT_SITE}^{commit}" 2>/dev/null; then
+  echo "  ⚠ Le site déclare ${COMMIT_SITE:0:12}, commit inconnu du dépôt local."
+  echo "    Branche supprimée depuis, ou « git fetch » à refaire ?"
+elif git merge-base --is-ancestor "$DERNIER_CODE" "$COMMIT_SITE"; then
+  SITE_A_JOUR=oui
   echo "  ✓ Le site exécute le dernier code applicatif de main."
 else
-  echo "  ✗ Le site exécute ${COMMIT_SITE:0:12}, or le dernier code applicatif est ${DERNIER_CODE:0:12}."
+  echo "  ✗ Le site exécute ${COMMIT_SITE:0:12}, antérieur au dernier code applicatif ${DERNIER_CODE:0:12}."
+  echo "    Commits applicatifs fusionnés mais pas déployés :"
+  git log --format='      %h %s' "${COMMIT_SITE}..${DERNIER_CODE}" -- "${CHEMINS_APPLICATIFS[@]}" | head -10
 fi
 
 # Remède, affiché seulement s'il y a lieu.
 PERIME=non
 [ -n "$DIGEST_POD" ] && [ "$DIGEST_POD" != "$DIGEST_ATTENDU" ] && PERIME=oui
-[ -n "$COMMIT_SITE" ] && [ "$COMMIT_SITE" != "$DERNIER_CODE" ] && PERIME=oui
+[ -n "$COMMIT_SITE" ] && [ "$SITE_A_JOUR" = "non" ] && PERIME=oui
 if [ "$PERIME" = "oui" ]; then
   echo
-  echo "  → Pour déployer : interface ArgoCD, application « $APP »,"
-  echo "    ressource Deployment, bouton « Restart ». Le pod est recréé et"
-  echo "    retélécharge l'image. Attention : les sessions de vérification"
-  echo "    en cours seront perdues (l'application n'a aucune persistance)."
+  echo "  → Pour déployer, dans ArgoCD : ouvrir l'application « $APP »,"
+  echo "    survoler la boîte « Deployment » du graphe, cliquer sur le menu ⋮"
+  echo "    qui apparaît, puis « Restart ». Le pod est recréé et retélécharge"
+  echo "    l'image. Attention : les sessions de vérification en cours seront"
+  echo "    perdues (l'application n'a aucune persistance)."
 fi
 echo
