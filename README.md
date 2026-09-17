@@ -5,6 +5,12 @@ les notices bibliographiques du SIGB **Syracuse** au catalogue **Sudoc** (ABES),
 met en évidence les écarts, et permet à un·e documentaliste de **corriger et
 compléter** les notices avant de les réexporter.
 
+**Application déployée : <https://unimarc-sudoc-reconciler.lab.sspcloud.fr>**
+(SSP Cloud, accès interne). Pour savoir quelle version y tourne :
+`curl -s https://unimarc-sudoc-reconciler.lab.sspcloud.fr/api/version`, ou
+`./scripts/verifier-deploiement.sh` pour le diagnostic complet — voir
+[« Mettre en production une nouvelle version »](#mettre-en-production-une-nouvelle-version).
+
 > **Statut : POC en cours de validation.** La logique de comparaison et de
 > conversion UNIMARC est héritée du prototype initial. Les règles métier sont
 > couvertes par des tests unitaires (`npm test`), mais elles doivent encore être
