@@ -266,6 +266,11 @@ D'où le geste retenu pour ce projet : **le bouton *Restart*** sur la ressource
 `Deployment`, dans l'interface ArgoCD. Même effet, mais c'est ArgoCD qui agit,
 avec ses propres permissions — vos droits de lecture suffisent.
 
+Il ne se trouve pas dans une barre d'outils : il faut survoler la boîte
+`Deployment` du graphe des ressources, cliquer sur le menu `⋮` qui apparaît, puis
+sur `Restart`. Le chemin détaillé, et le repli si l'action n'est pas proposée,
+sont dans le [README](README.md#mettre-en-production-une-nouvelle-version).
+
 Notez au passage le rôle d'`imagePullPolicy: Always` dans le manifeste. Il
 signifie « retélécharge l'image à chaque **démarrage** de conteneur » — et non
 « surveille le registre en continu », ce qui n'existe pas. Avec une étiquette

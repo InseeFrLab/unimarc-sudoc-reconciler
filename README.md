@@ -272,9 +272,25 @@ Procédure, à faire une fois :
 1. Fusionner la PR sur `main` et attendre que
    [.github/workflows/build-push.yml](.github/workflows/build-push.yml) ait publié
    l'image (onglet *Actions* du dépôt).
-2. Dans l'interface **ArgoCD**, ouvrir l'application `unimarc-sudoc-reconciler`,
-   sélectionner la ressource `Deployment` et cliquer sur **Restart**. Le pod est
-   détruit et recréé ; le nouveau retélécharge l'image publiée sous `latest`.
+2. Dans l'interface **ArgoCD** — <https://user-mhillion-argo-cd.user.lab.sspcloud.fr>
+   pour ce namespace — redémarrer le déploiement. Le bouton n'est pas dans une
+   barre d'outils, il se cache dans le menu d'une ressource du graphe :
+
+   1. ouvrir l'application `unimarc-sudoc-reconciler` depuis la liste ;
+   2. dans l'arborescence des ressources, repérer la boîte **`Deployment`** —
+      pas le `Pod`, pas l'`Application` : c'est le `Deployment` qui porte
+      l'action ;
+   3. survoler cette boîte : un menu **`⋮`** (trois points verticaux) apparaît
+      dans un coin ;
+   4. cliquer dessus, puis sur **`Restart`**.
+
+   Le pod est détruit et recréé ; le nouveau retélécharge l'image publiée sous
+   `latest`, grâce à `imagePullPolicy: Always`.
+
+   *Si `Restart` n'apparaît pas* : ouvrir le menu `⋮` de la boîte **`Pod`** et
+   choisir `Delete`. C'est sans danger — le `Deployment` doit maintenir un
+   exemplaire en vie, il en recrée donc un aussitôt, qui retélécharge l'image.
+   Effet identique.
 3. Contrôler avec [`scripts/verifier-deploiement.sh`](scripts/verifier-deploiement.sh).
 
 Le redémarrage est **volontairement manuel**. Déployer recrée le conteneur, et
