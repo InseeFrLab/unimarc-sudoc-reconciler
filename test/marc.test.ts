@@ -10,9 +10,9 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import {
-  buildFusedCollation, buildSruQuery, extractIllustrationMentions, generateEanFromIsbn,
-  isPpn, looksLikeTruncatedPpn, normalizeDescription, padPpn, parsePpn2Response,
-  parseSudocRecord, parseSudocXml, unimarcXmlToText,
+  anneeSru, buildFusedCollation, buildSruQuery, extractIllustrationMentions, generateEanFromIsbn,
+  isPpn, looksLikeTruncatedPpn, motsTitreSru, nomAuteurSru, normalizeDescription, padPpn,
+  parsePpn2Response, parseSudocRecord, parseSudocXml, unimarcXmlToText,
 } from '../server/marc.ts';
 
 const fixture = (name: string) =>
@@ -221,5 +221,51 @@ describe('buildSruQuery — critères de recherche par contenu (§3.3.2)', () =>
       'Auteur principal - Collectivité': 'Instituto brasileiro de geografia e estatística',
     });
     assert.equal(q.nomAuteur, 'Instituto+brasileiro');
+  });
+});
+
+// Normalisation des critères de la recherche approfondie : la documentaliste
+// saisit du texte libre, l'index SRU attend des mots joints par `+`.
+describe('motsTitreSru — critère titre saisi à la main', () => {
+  it('retire la ponctuation et joint les mots par +', () => {
+    assert.equal(motsTitreSru('Les comptes de la nation : édition 2022'), 'comptes+nation+édition+2022');
+  });
+  it('écarte les mots vides et les mots de deux lettres au plus', () => {
+    assert.equal(motsTitreSru('La vie de la cité'), 'vie+cité');
+  });
+  it('ne retient que les cinq premiers mots significatifs', () => {
+    assert.equal(motsTitreSru('alpha bravo charlie delta echo foxtrot golf').split('+').length, 5);
+  });
+  it('rend une chaîne vide quand rien n\'est exploitable', () => {
+    assert.equal(motsTitreSru('de la à'), '');
+    assert.equal(motsTitreSru(''), '');
+  });
+  it('donne le même résultat que la recherche automatique', () => {
+    const titre = 'Les comptes de la nation : édition 2022';
+    assert.equal(motsTitreSru(titre), buildSruQuery({ Titre: titre }).motsTitre);
+  });
+});
+
+describe('nomAuteurSru — critère auteur saisi à la main', () => {
+  it('sépare nom et prénom d\'une personne physique', () => {
+    assert.equal(nomAuteurSru('Martin, Paul'), 'Martin+Paul');
+  });
+  it('ne retient que deux mots significatifs d\'une collectivité', () => {
+    assert.equal(nomAuteurSru('Institut national de la statistique'), 'Institut+national');
+  });
+  it('rend une chaîne vide sur une saisie vide', () => {
+    assert.equal(nomAuteurSru(''), '');
+    assert.equal(nomAuteurSru('de la'), '');
+  });
+});
+
+describe('anneeSru — critère année', () => {
+  it('extrait le millésime d\'une mention de copyright', () => {
+    assert.equal(anneeSru('C 2022'), '2022');
+    assert.equal(anneeSru('2022, cop. 2021'), '2022');
+  });
+  it('rend une chaîne vide faute de millésime', () => {
+    assert.equal(anneeSru('sans date'), '');
+    assert.equal(anneeSru(''), '');
   });
 });

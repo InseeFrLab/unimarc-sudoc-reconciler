@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 
 import { sessions } from './sessions.ts';
 import { parseSyracuseNotices, detectCategory, SYRACUSE_MAPPING } from './syracuse.ts';
-import { fetchSudocRecord, padPpn, parseSudocXml, searchSru, delay } from './marc.ts';
+import { fetchSudocRecord, padPpn, parseSudocXml, searchSru, delay, motsTitreSru, nomAuteurSru, anneeSru } from './marc.ts';
 import { compareNoticeWithSudoc } from './compare.ts';
 import { verifyNotice } from './verify.ts';
 import { buildXmlExport, buildCsvExport, buildTxtExport } from './exports.ts';
@@ -150,11 +150,21 @@ app.get('/api/sudoc/:ppn', async (req, res) => {
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
+// Recherche approfondie : la documentaliste saisit elle-même les critères quand
+// la recherche automatique n'a rien donné de convaincant. `searchSru` sait déjà
+// combiner titre, auteur et année, avec son repli progressif ; on se contente
+// de normaliser les saisies comme le fait la recherche automatique.
 app.get('/api/sru/search', async (req, res) => {
   try {
     const title = req.query.title as string;
     if (!title) return res.status(400).json({ error: 'Titre requis' });
-    const result = await searchSru(title, '', '');
+    const motsTitre = motsTitreSru(title);
+    if (!motsTitre) return res.status(400).json({ error: 'Titre trop court : donnez au moins un mot de plus de deux lettres.' });
+    const result = await searchSru(
+      motsTitre,
+      nomAuteurSru((req.query.author as string) || ''),
+      anneeSru((req.query.year as string) || ''),
+    );
     res.json({ success: true, candidates: result.candidates });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
