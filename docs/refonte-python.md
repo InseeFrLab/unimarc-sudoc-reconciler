@@ -9,9 +9,11 @@ Ce document est la spécification de référence de la refonte du dépôt `Insee
 Règles de travail, à respecter pendant toute la refonte :
 
 - **Travailler phase par phase** (section 13), dans l'ordre. Ne pas commencer une phase tant que les critères de la précédente ne sont pas tous verts.
-- **Une branche par phase** (`refonte/phase-N`), une merge request par phase. Ne jamais pousser sur `main`, ne jamais fusionner soi-même.
+- **Une branche par phase** (`refonte/phase-N`), une merge request par phase. **Les merge requests de phase ciblent `refonte-python` (branche d'intégration), jamais `main`.** Ne jamais pousser sur `main` ni sur `refonte-python`, ne jamais fusionner soi-même.
+- **Ce document est la référence.** Toute décision prise en cours de refonte y est reportée et le corrige ; en cas de divergence entre ce texte et une consigne orale, on corrige d'abord ce texte.
+- **Le TypeScript fait foi** pour les sorties de référence (section 10.2). Si un résultat diffère de ce que l'agent attendait, il signale l'écart au lieu de le corriger.
 - **Ne rien inventer en matière de règles métier.** Toute règle bibliothéconomique vient du code TypeScript existant, de `CLAUDE.md` ou de `docs/metier-unimarc-sudoc.md`. En cas de doute ou de contradiction, s'arrêter et poser la question, ne pas trancher.
-- **Conserver le comportement, pas forcément le code.** Les anomalies listées en section 4.6 sont les seules corrections de comportement autorisées.
+- **Conserver le comportement, pas forcément le code.** Les anomalies corrigées (A1 à A3) et les retraits assumés (R1, R2) de la section 4.6 sont les seules modifications de comportement autorisées.
 - **Langue** : commentaires, docstrings, libellés d'interface, messages d'erreur et documentation en français. Identifiants de code en français quand ils désignent des notions métier (`notice`, `ecart`, `rattacher`), en anglais pour le vocabulaire technique standard.
 - **Avant chaque commit** : `uv run ruff format . && uv run ruff check . && uv run pytest -q`. Rien n'est commité si une commande échoue.
 - **Aucun accès réseau dans les tests.** Les appels au Sudoc et au LLM sont simulés.
@@ -32,7 +34,7 @@ L'application compare les notices du SIGB Syracuse au catalogue Sudoc de l'ABES,
 | Étape de compilation | `vite build` obligatoire | Aucune |
 | Mode développement derrière le proxy SSP Cloud | Cassé (page blanche) | Fonctionnel via `ROOT_PATH` |
 | Déploiement | Image `:latest`, *Restart* manuel, pas de retour arrière | Image taguée par SHA, mise à jour par merge request, ArgoCD synchronise |
-| Tests | 133 cas `node:test` | Les mêmes cas en pytest + tests de non-régression contre l'ancienne version |
+| Tests | 102 cas `node:test` (mesure `npm test`, 22 suites) | Les mêmes cas en pytest + tests de non-régression contre l'ancienne version |
 
 Objectifs, par ordre de priorité :
 
@@ -119,7 +121,8 @@ Règles :
 - **Aucune autre dépendance** sans accord explicite. En particulier : pas de `rapidfuzz` ni d'équivalent (la similarité doit reproduire exactement `string-similarity`, section 4.3), pas de bibliothèque de graphiques, pas de framework CSS à compilation.
 - **Aucun CDN** : HTMX et Pico sont copiés dans le dépôt, avec leur numéro de version dans le nom de fichier (`htmx-2.0.4.min.js`). L'application doit fonctionner sans accès Internet côté navigateur.
 - **Aucun JavaScript écrit à la main**, sauf une exception tolérée de moins de 10 lignes, à justifier en commentaire.
-- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`.
+- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`. `[tool.uv] package = false` : l'application n'est pas installée comme paquet, elle se lance depuis la racine (`uv run uvicorn app.main:app`). Ruff : `line-length = 100`, règles par défaut plus `I`, `UP`, `B`. `pytest` : `pythonpath = ["."]`.
+- **`pytest-cov` n'est pas ajouté** pour l'instant (décision d'équipe, section 14).
 
 ### 3.2 Arborescence cible
 
@@ -160,6 +163,8 @@ unimarc-sudoc-reconciler/
 │   ├── test_decisions.py
 │   ├── test_exports.py
 │   ├── test_rameau.py
+│   ├── test_reference.py    # garde-fou : fichiers de référence présents, volumes minimaux
+│   ├── test_architecture.py
 │   └── test_web.py
 ├── deploy/                  # manifestes Kubernetes + kustomization.yaml (section 11)
 ├── application.yaml         # ressource ArgoCD (conservée)
@@ -202,7 +207,7 @@ Les fonctions réseau de `sudoc.py` et `rameau.py` reçoivent un `httpx.Client` 
 
 Le code TypeScript manipule des `any`. La cible type tout avec des `dataclasses` (pas de Pydantic, inutile ici) dans `metier/modeles.py` :
 
-- `Notice` : `identifiant`, `ppn`, `titre`, `categorie` (`"A"`/`"B"`), `syracuse` (dict libellé → valeur), `properties` (liste ordonnée de couples `(nom, valeur)`, l'ordre du fichier source est conservé), `item_type`.
+- `Notice` : `identifiant`, `ppn`, `titre`, `categorie` (`"A"`/`"B"`), `syracuse` (dict libellé → valeur), `properties` (liste ordonnée de **triplets `(nom, valeur, attributs)`**, l'ordre du fichier source est conservé ; `attributs` est un dict qui porte `rank`, `referentialType` et `referentialName` tels que lus, pour que l'export XML les restitue à l'octet près), `item_type`.
 - `Ecart` : `champ`, `valeur_syracuse`, `valeur_sudoc`, `statut`, `action`, `valeur_modifiee` (optionnel), `unimarc` (optionnel : `tag` + sous-zones).
 - `Candidat` : `ppn`, données Sudoc parsées, `origine_piste` (optionnel).
 - `Resultat` : `identifiant`, `ppn`, `titre`, `categorie`, `syracuse`, `sudoc`, `sudoc_xml`, `statut_global`, `nb_erreurs`, `nb_complements`, `nb_mineures`, `ecarts`, `candidats`, `ppn_source_secours`, `ppn_origine`, `suggestions_ia`.
@@ -244,6 +249,12 @@ La notice est toujours désignée par son **`identifiant` Syracuse**, jamais par
 - **PPN sur 9 caractères** : `pad_ppn` partout, sinon l'API Sudoc renvoie 404.
 - **Pas de conversion de type à la lecture XML.** Avec `lxml`, les valeurs restent des chaînes : le risque de perte du zéro initial disparaît, mais aucun code ne doit appeler `int()` sur un PPN ou un IdRef.
 - **Espaces de bord des attributs.** fast-xml-parser trimait les valeurs d'attributs ; lxml ne le fait pas. Il faut donc appliquer explicitement `.strip()` au **nom** et à la **valeur** de chaque `property` Syracuse et des attributs des notices Sudoc. Sans cela, ` Auteur principal - Collectivité  ` (espace final) ne correspond plus à sa clé dans `SYRACUSE_MAPPING`, et les indicateurs `ind1=" "` ne sont plus vides.
+- **Trim du texte des nœuds.** `fast-xml-parser` trimait aussi le texte des éléments (sous-zones `<subfield>`, contrôlechamps) ; `lxml` ne le fait pas. Appliquer `.strip()` au texte de chaque nœud lu.
+- **Regex portées : ASCII uniquement.** `\d`, `\w`, `\s` et `\b` de JavaScript sont ASCII ; ceux de Python sont Unicode. Dans toute regex portée, utiliser `re.ASCII` ou des classes explicites (`[0-9]`). Concerne notamment `extract_idrefs`, l'année, `normalize_description`, la similarité. Note : `\s` de JavaScript inclut `U+FEFF`, pas les séparateurs `\x1c`-`\x1f` que `str.isspace()` de Python inclut ; les cas limites de `similarite.json` le vérifient.
+- **Longueurs UTF-16.** Quand une longueur ou un indice intervient dans un calcul (similarité, seuil de longueur, découpage par index), reproduire la mesure JavaScript (unités UTF-16), pas le nombre de points de code Python. Les références contiennent des caractères hors BMP pour le vérifier.
+- **Ordre des clés.** L'ordre d'insertion des clés de `parse_sudoc_record` détermine l'ordre des écarts, donc du CSV. Les tests comparent l'**ordre** des clés (liste), pas seulement l'égalité des dicts.
+- **Retours à la ligne dans les attributs.** `lxml` normalise `\n` et `\t` d'un attribut en espaces, `fast-xml-parser` non. Le comportement TypeScript est figé dans la référence (`syracuse-cas-limites.xml`). S'il s'avère impossible à reproduire proprement en Python, il sera accepté comme anomalie A6 (section 4.6) après vérification sur un vrai export Syracuse en recette, jamais avant.
+- **Export XML : libellés trimés, comportement conservé.** Le libellé `Auteur principal - Collectivité ` est écrit à l'export **sans** son espace final, parce que le parseur le trime. Ce comportement est conservé.
 - **Libellés Syracuse tels quels**, fautes comprises (`Auteur secondaire- Collectivité`, `Nom - Responsabiblité`).
 - **Zones UNIMARC** mappées dans `parse_sudoc_record` : 200, 010, 214/210, 215, 225, 330, 327, 700/701/702, 710/711/712, 600/601/606/607/608, 300-305.
 - **Décodage de la zone 100** dans `unimarc_xml_to_text` : porté ligne à ligne, sans simplification.
@@ -258,14 +269,21 @@ La notice est toujours désignée par son **`identifiant` Syracuse**, jamais par
 - **Ordre des pistes** en catégorie A : PPN, puis isbn2ppn, puis ean2ppn. En catégorie B : PPN tronqué paddé, puis SRU ; une erreur SRU n'est fatale que si aucun candidat n'a été trouvé.
 - **Température 0** pour l'appel RAMEAU.
 
-### 4.6 Anomalies existantes : corrections autorisées
+### 4.6 Anomalies existantes, retraits assumés
 
-Ce sont les seules modifications de comportement permises. Chacune est un commit séparé avec un test qui la démontre.
+Les corrections A1 à A3 et les retraits R1 et R2 sont les seules modifications de comportement permises. Chaque correction est un commit séparé avec un test qui la démontre.
 
 - **A1 — Statut incohérent après dévalidation.** La route `/valider` remet `DIFFERENCE_MINEURE` comme statut de notice, alors que la vérification et le résumé utilisent `MINEURE`. Une notice dévalidée disparaît donc du compteur « mineures ». Correction : utiliser `MINEURE`.
 - **A2 — Paramètres mal nommés.** Trois routes nomment `:ppn` un identifiant Syracuse. Disparaît de fait avec les nouvelles routes (section 6).
 - **A3 — Double sens d'ABSENT\_SUDOC.** Le statut d'écart (« champ vide côté Sudoc ») et le statut de notice (« PMB introuvable ») partagent la même valeur. Les deux énumérations séparées de la section 4.2 lèvent l'ambiguïté dans le code ; les valeurs texte restent identiques.
 - **A4 — Recherche approfondie.** Le bouton passe la notice en ABSENT\_SUDOC pour afficher le panneau de recherche manuelle. Le comportement est conservé (A4 n'est **pas** corrigée), mais la fonction porte un nom explicite (`passer_en_recherche_manuelle`) et un commentaire signale le couplage. À rediscuter avec la documentaliste (section 14).
+- **A5 — Dévalidation d'une notice qui n'était pas en écart (signalée, NON corrigée).** `basculer_validation` ramène une notice dévalidée à `OK` (catégorie A) ou `RATTACHE_SRU` (catégorie B), quel que soit son statut d'origine. Une notice A en `NON_TROUVE`, validée puis dévalidée, devient donc `OK` ; une notice B en `EN_ATTENTE_RATTACHEMENT` ou `ABSENT_SUDOC` devient `RATTACHE_SRU`. Le comportement est reproduit tel quel et documenté en commentaire ; la question est posée à la documentaliste (section 14).
+- **A6 — Retours à la ligne dans les attributs (éventuelle, non décidée).** À n'ouvrir que si la reproduction du comportement de `fast-xml-parser` s'avère impossible proprement (section 4.5) ; décision après vérification sur un vrai export en recette.
+
+**Retraits assumés** (fonctionnalités de la version 1.4.0 qui disparaissent volontairement) :
+
+- **R1 — Endpoint LLM non modifiable dans l'interface.** Il se règle par la variable `LLM_ENDPOINT` (section 8.1).
+- **R2 — Suppression de l'API JSON** `/api/*` hors `/api/version` : son seul client était le front React (section 6).
 
 ## 5. Frontend simplifié : Jinja + HTMX
 
@@ -415,7 +433,7 @@ Règles :
 - Refuse le lancement si la session est déjà `EN_COURS`.
 - Pour chaque notice, dans l'ordre : met à jour la progression, appelle `verify_notice`, ajoute le résultat, puis `time.sleep(0.5)`.
 - En cas d'exception non rattrapée : statut `ERREUR`, trace dans les journaux. Une erreur sur une notice reste gérée par `verify_notice` (résultat en ERREUR avec l'écart « Erreur Interne »), comme aujourd'hui.
-- Le `httpx.Client` utilisé a un délai d'expiration explicite (10 s par appel ABES) et un `User-Agent` identifiant l'application.
+- Le `httpx.Client` utilisé a un délai d'expiration explicite (15 s par appel ABES, comme le code TypeScript) et un `User-Agent` identifiant l'application.
 
 ### 7.3 Contraintes de déploiement induites
 
@@ -477,7 +495,7 @@ La garantie de parité repose sur trois niveaux de tests, tous exécutés sans r
 
 ### 10.1 Portage des tests existants
 
-Les 133 cas de `test/*.test.ts` sont portés un pour un en pytest, avec les mêmes fixtures (`test/fixtures/syracuse-echantillon.xml`, `test/fixtures/sudoc-267670346.xml`, copiées dans `tests/fixtures/`). Le nom de chaque test Python reprend le libellé du test d'origine. Un tableau de correspondance (fichier `tests/CORRESPONDANCE.md`) liste chaque cas TS et le test Python qui le couvre ; aucun cas ne peut manquer.
+Les 102 cas de `test/*.test.ts` (nombre mesuré par `npm test`) sont portés un pour un en pytest, avec les mêmes fixtures (`test/fixtures/syracuse-echantillon.xml`, `test/fixtures/sudoc-267670346.xml`, copiées dans `tests/fixtures/`). Le nom de chaque test Python reprend le libellé du test d'origine. Un tableau de correspondance (fichier `tests/CORRESPONDANCE.md`) liste chaque cas TS et le test Python qui le couvre ; aucun cas ne peut manquer, quel que soit leur nombre (le nombre réel fait foi, pas un chiffre figé dans ce document).
 
 ### 10.2 Sorties de référence générées depuis la version TypeScript
 
@@ -493,7 +511,17 @@ Avant d'écrire la moindre ligne de Python métier (phase 1), un script Node tem
 | `unimarc.txt` | Résultat de `unimarcXmlToText` sur la fixture Sudoc |
 | `export.xml`, `export.csv`, `export.txt` | Exports d'une session construite à partir des fixtures, avec un jeu de décisions fixe (au moins un ACCEPTER, un CONSERVER, un MODIFIER, un rattachement, une vedette ajoutée) |
 
-Les tests Python rejouent les mêmes entrées et comparent à ces fichiers, à l'octet près pour les exports. Toute différence est soit une anomalie autorisée de la section 4.6 (référence régénérée et différence expliquée dans le commit), soit un bug. Le script de génération est supprimé en phase 6 ; les fichiers de référence restent.
+Règles de génération :
+
+- **Le TypeScript fait foi.** Pour chaque triplet de `compare_fields.json`, le script consigne aussi le statut que l'agent attendait d'après sa lecture du code. En cas d'écart, le script ne corrige rien : il signale l'écart (affichage et champ `attendu_agent` du fichier), la valeur du TypeScript est celle qui est enregistrée, et l'agent en informe l'équipe.
+- **Aucun accès réseau** : le script remplace `axios.get` et `axios.post` par une fonction qui lève une erreur.
+- **Logique des décisions recopiée à l'identique.** Les routes de `server/index.ts` ne sont pas appelables (le fichier lance le serveur à l'import). Le script en recopie la logique à l'identique (valider, rattacher, absent, action, bulk-action, add-keyword), avec en commentaire les numéros de lignes d'origine. `server/index.ts` n'est pas modifié. Pour le rattachement, le XML Sudoc vient d'une fixture au lieu de `fetchSudocRecord`.
+- **Fixtures de cas limites**, synthétiques uniquement, sans aucune donnée réelle : `tests/fixtures/syracuse-cas-limites.xml` (entités, `&#10;`, espaces de bord sur nom, valeur et attributs, propriété sans `value`, noms en double, item sans `Identifiant`, `type` absent, PPN avec zéro initial ou `X`, `Filtre` en minuscules) et `tests/fixtures/sudoc-cas-limites.xml` (une zone ou plusieurs, 210 au lieu de 214, sous-zone vide, texte avec espaces de bord, zone 100 de chaque code `a b d e f g h j` et d'un code inconnu, dates invalides, 073 présent, ISBN-10, 215 sans `$c`, 183 présent, vedettes 600 à 608, 701/702/710-712 multiples). Fichiers de référence supplémentaires : `ecarts_cas_limites.json`, `unimarc_cas_limites.txt`, `export_decisions.json` (jeu de décisions rejoué par les tests Python). Les fichiers exigés par le tableau restent construits sur les fixtures actuelles.
+- **Format neutre** : `syracuse.json` écrit les propriétés en `{name, value, rank, referentialType, referentialName}` (`null` si l'attribut est absent) ; `parsedXml` n'y figure pas. Les autres sorties gardent les clés camelCase du TypeScript, les tests Python convertissent.
+- **`ecarts.json`** couvre la notice A, les deux notices B comparées à la fixture Sudoc (simulation d'un rattachement) et la notice A contre des variantes de Sudoc.
+- **Déterminisme** : pas de date ni d'aléatoire ; deux exécutions successives produisent des fichiers identiques.
+
+Les tests Python rejouent les mêmes entrées et comparent à ces fichiers, à l'octet près pour les exports. Toute différence est soit une correction autorisée de la section 4.6 (référence régénérée et différence expliquée dans le commit), soit un bug. Le script de génération est supprimé en phase 6 ; les fichiers de référence restent.
 
 ### 10.3 Tests propres à la cible
 
@@ -501,12 +529,13 @@ Les tests Python rejouent les mêmes entrées et comparent à ces fichiers, à l
 - `test_decisions.py` : chaque règle de la section 4.4, dont le cas particulier TOUT\_ACCEPTER en catégorie B et l'anomalie A1.
 - `test_rameau.py` : `nettoyer_suggestions` sur des réponses LLM bruitées, `models_url`, refus quand les champs sont vides.
 - `test_web.py` avec le `TestClient` de FastAPI : parcours complet dépôt → progression → tableau → notice → action → export, sur un stockage mémoire et un client HTTP simulé ; session inconnue → 404 lisible ; `url_for` avec `ROOT_PATH=/proxy/8000` produit des liens préfixés ; la clé LLM n'apparaît dans aucune réponse.
-- `test_architecture.py` : aucun module de `app/metier/` n'importe `fastapi`, `jinja2`, `app.web`, `app.sessions` ou `app.taches` (analyse des imports avec `ast`).
+- `test_architecture.py` : aucun module de `app/metier/` n'importe `fastapi`, `starlette`, `uvicorn`, `jinja2`, `app.web`, `app.sessions`, `app.taches` ni `app.main` (analyse des imports avec `ast`, y compris `from app import web`, les imports relatifs et les imports dans une fonction). Le test prend le dossier en paramètre ; un test négatif sur `tmp_path` prouve qu'il détecte chaque violation. Limite connue : les imports dynamiques (`importlib`) ne sont pas vus.
+- `test_reference.py` : garde-fou permanent. Tous les fichiers de la table 10.2 existent, `similarite.json` contient au moins 30 paires, `compare_fields.json` au moins 60 triplets, aucun fichier n'est vide.
 
 ### 10.4 Qualité
 
 - `uv run ruff format --check .` et `uv run ruff check .` sans erreur (configuration ruff par défaut + règles `I`, `UP`, `B`).
-- Couverture indicative : au moins 85 % sur `app/metier/` (`pytest --cov`, ajouté en dépendance de développement si l'équipe l'accepte ; sinon, non bloquant).
+- Couverture : pas de `pytest-cov` pour l'instant (décision d'équipe). La complétude se juge par la correspondance des tests (10.1) et les références (10.2).
 - Recette manuelle (phase 5) sur un vrai export Syracuse fourni par la documentaliste, en local uniquement, jamais commité.
 
 ## 11. Conteneur, CI et déploiement SSP Cloud
@@ -667,12 +696,16 @@ Sept phases, chacune sur sa branche et dans sa merge request. Une phase n'est te
 
 Créer `pyproject.toml` (Python 3.12, dépendances de la section 3.1), le squelette `app/` vide, `tests/`, la configuration ruff ; écrire `scripts/generer_reference.ts` et produire `tests/reference/` (section 10.2) avec le code TypeScript actuel.
 
-Prérequis : Node.js 20 ou plus dans le service VSCode, pour exécuter l'ancien code et `generer_reference.ts`. Il n'est pas installé par défaut sur les services du SSP Cloud ; le README de la phase 0 indique comment l'installer sans droits administrateur.
+Prérequis : Node.js 20 ou plus, pour exécuter l'ancien code et `generer_reference.ts`. Il n'est pas installé par défaut sur les services du SSP Cloud. Il est ici déjà installé dans `~/.local/node-v22.11.0-linux-x64/bin` (vérifié : `node --version` → v22.11.0, `npm test` → 102 cas passent) ; **ne pas le réinstaller**. `tests/reference/README.md` indique comment l'installer sans droits administrateur et comment régénérer les références.
 
-- [ ] `uv sync` et `uv run pytest -q` s'exécutent sans erreur.
-- [ ] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets).
-- [ ] `npm test` passe toujours (rien n'a été cassé côté TypeScript).
-- [ ] `test_architecture.py` est en place.
+Fichiers de la phase : `pyproject.toml`, `uv.lock`, `.python-version`, `app/__init__.py`, `app/metier/__init__.py`, `tests/test_architecture.py`, `tests/test_reference.py`, `tests/fixtures/` (copies et fixtures de cas limites), `tests/reference/`, `scripts/generer_reference.ts`, `.gitignore` complété, `.gitattributes` (`tests/reference/** -text`, pour que la comparaison à l'octet près ne soit pas faussée par une conversion de fins de ligne). Le TypeScript n'est pas modifié.
+
+- [ ] `uv sync` et `uv run pytest -q` s'exécutent sans erreur ; `uv lock --check` passe.
+- [ ] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets) ; `test_reference.py` le vérifie.
+- [ ] `npm test` passe toujours, avec le même nombre de cas qu'au départ (102) ; `git diff --stat -- server src test package.json package-lock.json` est vide.
+- [ ] `test_architecture.py` est en place, avec son test négatif.
+- [ ] Deux exécutions consécutives de `generer_reference.ts` ne changent aucun fichier (`git diff --exit-code tests/reference`).
+- [ ] Les écarts éventuels entre les statuts attendus par l'agent et ceux du TypeScript sont listés dans la description de la merge request.
 
 ### Phase 1 — Fondations métier hors réseau
 
@@ -697,7 +730,7 @@ Prérequis : Node.js 20 ou plus dans le service VSCode, pour exécuter l'ancien 
 `exports.py`, `rameau.py`.
 
 - [ ] Les trois exports égalent `export.xml`, `export.csv`, `export.txt` à l'octet près.
-- [ ] Les cas portés de `exports.test.ts` passent ; `tests/CORRESPONDANCE.md` est complet (133 lignes).
+- [ ] Les cas portés de `exports.test.ts` passent ; `tests/CORRESPONDANCE.md` couvre tous les cas de `test/*.test.ts` (une ligne par cas, nombre vérifié contre `npm test`).
 - [ ] Les prompts RAMEAU sont identiques caractère pour caractère à ceux de `server/index.ts` (test de comparaison de chaînes).
 
 ### Phase 4 — Application web
@@ -747,6 +780,8 @@ Décisions ouvertes, à trancher par l'équipe et non par l'agent :
 | Authentification | L'ingress n'en déclare aucune. Faut-il protéger l'accès (oauth2-proxy + Keycloak SSP Cloud) ? | Hors refonte ; à instruire ensuite, prérequis pour toute clé LLM de service |
 | Namespace | L'application tourne dans le namespace personnel `user-mhillion`. | Migrer vers un namespace de projet SSP Cloud quand il existera |
 | Recherche approfondie (A4) | Le passage en ABSENT\_SUDOC pour ouvrir la recherche manuelle convient-il à la documentaliste ? | Conserver tel quel, poser la question en recette |
-| Endpoint LLM | Faut-il garder la possibilité de changer d'endpoint depuis l'interface ? | Non : variable d'environnement uniquement |
-| Couverture de tests | Ajouter `pytest-cov` en dépendance de développement ? | Oui, non bloquant |
+| Dévalidation (A5) | Une notice dévalidée revient à `OK` (A) ou `RATTACHE_SRU` (B) quel que soit son statut d'origine : une notice A `NON_TROUVE` validée puis dévalidée devient `OK`. Est-ce acceptable ? | Conserver tel quel, poser la question en recette |
+| Retours à la ligne (A6) | Les `\n` dans les attributs d'un vrai export Syracuse sont-ils réels (Résumé multi-lignes) ? | Vérifier en recette sur un vrai export avant d'accepter A6 |
+| Endpoint LLM (R1) | Décidé : non modifiable depuis l'interface, variable `LLM_ENDPOINT` uniquement | Tranché |
+| Couverture de tests | Ajouter `pytest-cov` en dépendance de développement ? | Non pour l'instant (décision prise) |
 | Hébergement du dépôt | Rester sur GitHub (InseeFrLab) avec ghcr.io, ou passer sur la forge interne ? | Rester sur GitHub tant que l'application est sur le SSP Cloud |
