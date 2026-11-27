@@ -1,0 +1,231 @@
+{
+  "countCatA": 2,
+  "countCatB": 2,
+  "notices": [
+    {
+      "ppn": "026927438",
+      "titre": "Études & essais : \"économie\" <2022>",
+      "identifiant": "LIM-001",
+      "categorie": "A",
+      "syracuse": {
+        "Identifiant": "LIM-001",
+        "Identifiant d'origine": "026927438",
+        "Filtre": "insee sudoc",
+        "Titre": "Études & essais : \"économie\" <2022>",
+        "Résumé": "Première ligne&#10;Deuxième ligne&#9;avec tabulation&#13;&#10;Fin",
+        "Auteur principal - Collectivité": "Institut national",
+        "Editeur": "Insee",
+        "Collection": "Seconde",
+        "Vedette matière - Nom commun": "Économie rameau"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "LIM-001",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "026927438",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Filtre",
+          "value": "insee sudoc",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Études & essais : \"économie\" <2022>",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Résumé",
+          "value": "Première ligne&#10;Deuxième ligne&#9;avec tabulation&#13;&#10;Fin",
+          "rank": "5",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Auteur principal - Collectivité",
+          "value": "Institut national",
+          "rank": "6",
+          "referentialType": "Autorité",
+          "referentialName": "Collectivités"
+        },
+        {
+          "name": "Editeur",
+          "value": "Insee",
+          "rank": "7",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Notes",
+          "value": null,
+          "rank": "8",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Collection",
+          "value": "Première",
+          "rank": "9",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Collection",
+          "value": "Seconde",
+          "rank": "10",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Vedette matière - Nom commun",
+          "value": "Économie rameau",
+          "rank": null,
+          "referentialType": null,
+          "referentialName": null
+        }
+      ]
+    },
+    {
+      "ppn": "12345678X",
+      "titre": "Notice sans attribut type, PPN terminé par X",
+      "identifiant": "LIM-002",
+      "categorie": "A",
+      "syracuse": {
+        "Identifiant": "LIM-002",
+        "Identifiant d'origine": "12345678X",
+        "Titre": "Notice sans attribut type, PPN terminé par X"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "LIM-002",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "12345678X",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Notice sans attribut type, PPN terminé par X",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    },
+    {
+      "ppn": "1234567X",
+      "titre": "Identifiant de huit caractères terminé par X",
+      "identifiant": "LIM-004",
+      "categorie": "B",
+      "syracuse": {
+        "Identifiant": "LIM-004",
+        "Identifiant d'origine": "1234567X",
+        "Filtre": "PMB.BIB",
+        "Titre": "Identifiant de huit caractères terminé par X",
+        "Publié le": "1998"
+      },
+      "itemType": "AUTRE",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "LIM-004",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "1234567X",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Filtre",
+          "value": "PMB.BIB",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Identifiant de huit caractères terminé par X",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Publié le",
+          "value": "1998",
+          "rank": "5",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    },
+    {
+      "ppn": "",
+      "titre": "Identifiant d'origine vide",
+      "identifiant": "LIM-005",
+      "categorie": "B",
+      "syracuse": {
+        "Identifiant": "LIM-005",
+        "Identifiant d'origine": "",
+        "Titre": "Identifiant d'origine vide"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "LIM-005",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Identifiant d'origine vide",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": null,
+          "value": "valeur sans nom",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    }
+  ]
+}

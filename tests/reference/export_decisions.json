@@ -1,0 +1,75 @@
+[
+  {
+    "op": "action",
+    "identifiant": "SYR-001",
+    "champ": "Titre",
+    "action": "ACCEPTER"
+  },
+  {
+    "op": "action",
+    "identifiant": "SYR-001",
+    "champ": "Editeur",
+    "action": "CONSERVER"
+  },
+  {
+    "op": "action",
+    "identifiant": "SYR-001",
+    "champ": "Résumé",
+    "action": "MODIFIER",
+    "valeurModifiee": "Texte \"modifié\" & <testé> ; ok"
+  },
+  {
+    "op": "vedette",
+    "identifiant": "SYR-001",
+    "texte": "  Statistique publique "
+  },
+  {
+    "op": "suggestions",
+    "identifiant": "SYR-001",
+    "suggestions": [
+      {
+        "text": "Comptabilité nationale Histoire",
+        "selected": true
+      },
+      {
+        "text": "Autre piste \"non retenue\"",
+        "selected": false
+      }
+    ]
+  },
+  {
+    "op": "rattacher",
+    "identifiant": "SYR-002",
+    "ppn": "267670346"
+  },
+  {
+    "op": "bulk",
+    "identifiant": "SYR-002",
+    "action": "TOUT_ACCEPTER"
+  },
+  {
+    "op": "action",
+    "identifiant": "SYR-002",
+    "champ": "Titre",
+    "action": "CONSERVER"
+  },
+  {
+    "op": "absent",
+    "identifiant": "SYR-003"
+  },
+  {
+    "op": "action",
+    "identifiant": "SYR-003",
+    "champ": "Résumé",
+    "action": "MODIFIER",
+    "valeurModifiee": "Ajout manuel"
+  },
+  {
+    "op": "valider",
+    "identifiant": "SYR-001"
+  },
+  {
+    "op": "valider",
+    "identifiant": "SYR-001"
+  }
+]

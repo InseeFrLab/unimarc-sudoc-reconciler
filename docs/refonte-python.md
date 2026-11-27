@@ -121,7 +121,7 @@ Règles :
 - **Aucune autre dépendance** sans accord explicite. En particulier : pas de `rapidfuzz` ni d'équivalent (la similarité doit reproduire exactement `string-similarity`, section 4.3), pas de bibliothèque de graphiques, pas de framework CSS à compilation.
 - **Aucun CDN** : HTMX et Pico sont copiés dans le dépôt, avec leur numéro de version dans le nom de fichier (`htmx-2.0.4.min.js`). L'application doit fonctionner sans accès Internet côté navigateur.
 - **Aucun JavaScript écrit à la main**, sauf une exception tolérée de moins de 10 lignes, à justifier en commentaire.
-- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`. `[tool.uv] package = false` : l'application n'est pas installée comme paquet, elle se lance depuis la racine (`uv run uvicorn app.main:app`). Ruff : `line-length = 100`, règles par défaut plus `I`, `UP`, `B`. `pytest` : `pythonpath = ["."]`.
+- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`. `[tool.uv] package = false` : l'application n'est pas installée comme paquet, elle se lance depuis la racine (`uv run uvicorn app.main:app`). Ruff : `line-length = 100`, règles par défaut plus `I`, `UP`, `B` ; les fichiers `*.md` sont exclus du formatage (`[tool.ruff.format] exclude`), car `ruff format .` reformate sinon les blocs Python de la documentation, spec comprise. `pytest` : `pythonpath = ["."]`.
 - **`pytest-cov` n'est pas ajouté** pour l'instant (décision d'équipe, section 14).
 
 ### 3.2 Arborescence cible
@@ -516,7 +516,7 @@ Règles de génération :
 - **Le TypeScript fait foi.** Pour chaque triplet de `compare_fields.json`, le script consigne aussi le statut que l'agent attendait d'après sa lecture du code. En cas d'écart, le script ne corrige rien : il signale l'écart (affichage et champ `attendu_agent` du fichier), la valeur du TypeScript est celle qui est enregistrée, et l'agent en informe l'équipe.
 - **Aucun accès réseau** : le script remplace `axios.get` et `axios.post` par une fonction qui lève une erreur.
 - **Logique des décisions recopiée à l'identique.** Les routes de `server/index.ts` ne sont pas appelables (le fichier lance le serveur à l'import). Le script en recopie la logique à l'identique (valider, rattacher, absent, action, bulk-action, add-keyword), avec en commentaire les numéros de lignes d'origine. `server/index.ts` n'est pas modifié. Pour le rattachement, le XML Sudoc vient d'une fixture au lieu de `fetchSudocRecord`.
-- **Fixtures de cas limites**, synthétiques uniquement, sans aucune donnée réelle : `tests/fixtures/syracuse-cas-limites.xml` (entités, `&#10;`, espaces de bord sur nom, valeur et attributs, propriété sans `value`, noms en double, item sans `Identifiant`, `type` absent, PPN avec zéro initial ou `X`, `Filtre` en minuscules) et `tests/fixtures/sudoc-cas-limites.xml` (une zone ou plusieurs, 210 au lieu de 214, sous-zone vide, texte avec espaces de bord, zone 100 de chaque code `a b d e f g h j` et d'un code inconnu, dates invalides, 073 présent, ISBN-10, 215 sans `$c`, 183 présent, vedettes 600 à 608, 701/702/710-712 multiples). Fichiers de référence supplémentaires : `ecarts_cas_limites.json`, `unimarc_cas_limites.txt`, `export_decisions.json` (jeu de décisions rejoué par les tests Python). Les fichiers exigés par le tableau restent construits sur les fixtures actuelles.
+- **Fixtures de cas limites**, synthétiques uniquement, sans aucune donnée réelle : `tests/fixtures/syracuse-cas-limites.xml` (entités, `&#10;`, espaces de bord sur nom, valeur et attributs, propriété sans `value`, noms en double, item sans `Identifiant`, `type` absent, PPN avec zéro initial ou `X`, `Filtre` en minuscules) et `tests/fixtures/sudoc-cas-limites.xml` (une zone ou plusieurs, 210 au lieu de 214, sous-zone vide, texte avec espaces de bord, zone 100 de chaque code `a b d e f g h j` et d'un code inconnu, dates invalides, 073 présent, ISBN-10, 215 sans `$c`, 183 présent, vedettes 600 à 608, 701/702/710-712 multiples). Fichiers de référence supplémentaires : `syracuse_cas_limites.json`, `sudoc_cas_limites.json`, `ecarts_cas_limites.json`, `unimarc_cas_limites.txt`, `export_decisions.json` (jeu de décisions rejoué par les tests Python). Les fichiers exigés par le tableau restent construits sur les fixtures actuelles.
 - **Format neutre** : `syracuse.json` écrit les propriétés en `{name, value, rank, referentialType, referentialName}` (`null` si l'attribut est absent) ; `parsedXml` n'y figure pas. Les autres sorties gardent les clés camelCase du TypeScript, les tests Python convertissent.
 - **`ecarts.json`** couvre la notice A, les deux notices B comparées à la fixture Sudoc (simulation d'un rattachement) et la notice A contre des variantes de Sudoc.
 - **Déterminisme** : pas de date ni d'aléatoire ; deux exécutions successives produisent des fichiers identiques.
@@ -700,12 +700,12 @@ Prérequis : Node.js 20 ou plus, pour exécuter l'ancien code et `generer_refere
 
 Fichiers de la phase : `pyproject.toml`, `uv.lock`, `.python-version`, `app/__init__.py`, `app/metier/__init__.py`, `tests/test_architecture.py`, `tests/test_reference.py`, `tests/fixtures/` (copies et fixtures de cas limites), `tests/reference/`, `scripts/generer_reference.ts`, `.gitignore` complété, `.gitattributes` (`tests/reference/** -text`, pour que la comparaison à l'octet près ne soit pas faussée par une conversion de fins de ligne). Le TypeScript n'est pas modifié.
 
-- [ ] `uv sync` et `uv run pytest -q` s'exécutent sans erreur ; `uv lock --check` passe.
-- [ ] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets) ; `test_reference.py` le vérifie.
-- [ ] `npm test` passe toujours, avec le même nombre de cas qu'au départ (102) ; `git diff --stat -- server src test package.json package-lock.json` est vide.
-- [ ] `test_architecture.py` est en place, avec son test négatif.
-- [ ] Deux exécutions consécutives de `generer_reference.ts` ne changent aucun fichier (`git diff --exit-code tests/reference`).
-- [ ] Les écarts éventuels entre les statuts attendus par l'agent et ceux du TypeScript sont listés dans la description de la merge request.
+- [x] `uv sync` et `uv run pytest -q` s'exécutent sans erreur ; `uv lock --check` passe.
+- [x] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets) ; `test_reference.py` le vérifie.
+- [x] `npm test` passe toujours, avec le même nombre de cas qu'au départ (102) ; `git diff --stat -- server src test package.json package-lock.json` est vide.
+- [x] `test_architecture.py` est en place, avec son test négatif.
+- [x] Deux exécutions consécutives de `generer_reference.ts` ne changent aucun fichier (`git diff --exit-code tests/reference`).
+- [x] Les écarts éventuels entre les statuts attendus par l'agent et ceux du TypeScript sont listés dans la description de la merge request.
 
 ### Phase 1 — Fondations métier hors réseau
 

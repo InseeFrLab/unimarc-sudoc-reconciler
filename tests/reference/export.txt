@@ -1,0 +1,32 @@
+001 267670346
+003 http://www.sudoc.fr/267670346
+010 ##$a978-2-11-138080-8$bbr.$d22 EUR
+100 0#$a2022$f2022
+200 1#$aLes comptes de la nation édition 2022$eédition 2022
+214 #0$cInsee$d2022
+215 ##$a1 volume (151 pages)$cill., Tableaux$d22 cm
+225 2#$aInsee références
+330 ##$aTexte "modifié" & <testé> ; ok$aComptabilité nationale$xFrance
+700 #1$aLedoux$bPierre$f1932-2011$3026927438$4070
+073 ##$a9782111380808
+606 ##$aComptabilité nationale France rameau; Statistique publique rameau
+183 ##$P01$anga
+606 ##$aComptabilité nationale Histoire$2rameau$9Suggestion IA à valider
+
+----------------------------------------
+
+001 267670346
+003 267670346
+010 ##$a978-2-11-138080-8$bbr.$d22 EUR
+100 0#$a2022$f2022
+200 1#$aLes comptes de la nation$eédition 2022
+214 #0$cInsee$d2022
+215 ##$a1 volume (151 pages) ill. 22 cm$cill.$d22 cm
+225 2#$aInsee références$aSynthèse annuelle des comptes nationaux.
+606 ##$aComptabilité nationale France rameau$xFrance
+700 #1$aLedoux Pierre 1932-2011 026927438 070$bPierre$f1932-2011$3026927438$4070
+214 ##$d2022
+010 ##$d22 EUR
+073 ##$a9782111380808
+330 ##$aSynthèse annuelle des comptes nationaux.
+183 ##$P01$anga

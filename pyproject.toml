@@ -1,0 +1,38 @@
+[project]
+name = "unimarc-sudoc-reconciler"
+version = "1.4.0"
+description = "Vérifie et corrige les notices Syracuse en les comparant au catalogue Sudoc."
+requires-python = "==3.12.*"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "python-multipart",
+    "httpx",
+    "lxml",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pytest",
+]
+
+[tool.uv]
+# L'application n'est pas installée comme paquet : on la lance depuis la racine.
+package = false
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+# Les versions récentes de ruff reformatent aussi les blocs Python des fichiers Markdown :
+# on les exclut pour que `ruff format .` ne réécrive jamais la documentation.
+exclude = ["*.md"]
+
+[tool.ruff.lint]
+extend-select = ["I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -1,0 +1,903 @@
+[
+  {
+    "branche": "vide-vide",
+    "champ": "Titre",
+    "syracuse": "",
+    "sudoc": "",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-syracuse",
+    "champ": "Titre",
+    "syracuse": "",
+    "sudoc": "x",
+    "attendu_agent": "MANQUANT_SYRACUSE",
+    "statut": "MANQUANT_SYRACUSE",
+    "categorie": "COMPLEMENT"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "Titre",
+    "syracuse": "x",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-vide",
+    "champ": "ISBN",
+    "syracuse": "",
+    "sudoc": "",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-syracuse",
+    "champ": "ISBN",
+    "syracuse": "",
+    "sudoc": "9782111380808",
+    "attendu_agent": "MANQUANT_SYRACUSE",
+    "statut": "MANQUANT_SYRACUSE",
+    "categorie": "COMPLEMENT"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "ISBN",
+    "syracuse": "9782111380808",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-syracuse",
+    "champ": "EAN",
+    "syracuse": "",
+    "sudoc": "9782111380808",
+    "attendu_agent": "MANQUANT_SYRACUSE",
+    "statut": "MANQUANT_SYRACUSE",
+    "categorie": "COMPLEMENT"
+  },
+  {
+    "branche": "vide-vide",
+    "champ": "Editeur",
+    "syracuse": "",
+    "sudoc": "",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-syracuse",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "",
+    "sudoc": "Dupont",
+    "attendu_agent": "MANQUANT_SYRACUSE",
+    "statut": "MANQUANT_SYRACUSE",
+    "categorie": "COMPLEMENT"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Dupont",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "Publié le",
+    "syracuse": "2022",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "Collection",
+    "syracuse": " ",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "espace-seul",
+    "champ": "Collection",
+    "syracuse": " ",
+    "sudoc": "x",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "vide-syracuse",
+    "champ": "Identifiant",
+    "syracuse": "",
+    "sudoc": "B",
+    "attendu_agent": "MANQUANT_SYRACUSE",
+    "statut": "MANQUANT_SYRACUSE",
+    "categorie": "COMPLEMENT"
+  },
+  {
+    "branche": "vide-sudoc",
+    "champ": "Filtre",
+    "syracuse": "SUDOC",
+    "sudoc": "",
+    "attendu_agent": "ABSENT_SUDOC",
+    "statut": "ABSENT_SUDOC",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Identifiant",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Identifiant d'origine",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Filtre",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Règle",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Nombre d'exemplaires",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Référence commerciale",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Référence éditoriale",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "EAN (valeur)",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "UPC",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Document",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Type de notice",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Agence de catalogage",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Titre uniforme",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Titre : volume",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Titre de partie et N° de partie",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Titre de série",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Tome",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "non-modifiable",
+    "champ": "Nom - Responsabiblité",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "NON_VERIFIE",
+    "statut": "NON_VERIFIE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "978-2-11-138080-8",
+    "sudoc": "9782111380808",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "2-11-138080-1",
+    "sudoc": "2111380801",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "978 2 11 138080 8",
+    "sudoc": "9782111380808",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "9782111380808",
+    "sudoc": "9782111380809",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "978-2-11-138080-8",
+    "sudoc": "978-2-11-138080-8 ",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "isbn",
+    "champ": "ISBN",
+    "syracuse": "978–2–11",
+    "sudoc": "978-2-11",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "ean",
+    "champ": "EAN",
+    "syracuse": "978 2111 380808",
+    "sudoc": "9782111380808",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "ean",
+    "champ": "EAN",
+    "syracuse": "9782111380808",
+    "sudoc": "9782111380808",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "ean",
+    "champ": "EAN",
+    "syracuse": "9782111380808\t",
+    "sudoc": "9782111380808",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "ean",
+    "champ": "EAN",
+    "syracuse": "978-2111380808",
+    "sudoc": "9782111380808",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "ean",
+    "champ": "EAN",
+    "syracuse": "9782111380808",
+    "sudoc": "9782111380809",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "C 2022",
+    "sudoc": "2022",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "2022",
+    "sudoc": "2023",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "2022, cop. 2021",
+    "sudoc": "2022",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "sans date",
+    "sudoc": "2022",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "202",
+    "sudoc": "2022",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "12345",
+    "sudoc": "1234",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "vers 1965 ?",
+    "sudoc": "1965",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "XXXX",
+    "sudoc": "sans date",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "٢٠٢٢",
+    "sudoc": "2022",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "annee",
+    "champ": "Publié le",
+    "syracuse": "cop. 2021, 2022",
+    "sudoc": "2022",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Ledoux, Pierre (1932-2011) 026927438",
+    "sudoc": "Ledoux Pierre 1932-2011 026927438 070",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Dupont Jean 026927438",
+    "sudoc": "dupont jean 026927438",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Éluard Paul 026927438",
+    "sudoc": "Eluard Paul 026927438",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur secondaire - Personne physique",
+    "syracuse": "Éluard Paul 026927438",
+    "sudoc": "Eluard Paul 026927438",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur secondaire- Collectivité",
+    "syracuse": "Insee 026927438",
+    "sudoc": "INSEE 026927438",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Autre auteur principal - Personne physique",
+    "syracuse": "Dupont J. 026927438",
+    "sudoc": "Dupont Jean 026927438 070",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "auteur-idref-commun",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "A 026927438 ; B 070123456",
+    "sudoc": "A 026927438",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "auteur-idref-x-minuscule",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Nom 12345678x",
+    "sudoc": "Nom 12345678X",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "auteur-idref-differents",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Dupont Jean 026927438",
+    "sudoc": "Durand Paul 070123456",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "auteur-idref-differents",
+    "champ": "Autre auteur principal - Collectivité",
+    "syracuse": "Insee 026927438",
+    "sudoc": "Ined 070123456",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "auteur-idref-un-cote",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Dupont, Jean",
+    "sudoc": "Dupont Jean 026927438",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "auteur-nombre-10-chiffres",
+    "champ": "Auteur principal - Personne physique",
+    "syracuse": "Nom 1234567890",
+    "sudoc": "Nom 1234567891",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "auteur-prefixe-sensible-casse",
+    "champ": "auteur principal",
+    "syracuse": "Dupont 026927438",
+    "sudoc": "Durand 070123456",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "Les comptes de la nation : édition 2022",
+    "sudoc": "Les comptes de la nation ; édition 2022",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "L’économie",
+    "sudoc": "L'économie",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "ERREUR",
+    "categorie": "ERREUR",
+    "ecart_avec_attendu_agent": true
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "Titre A",
+    "sudoc": "titre a",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "Le titre",
+    "sudoc": "Le titre",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "A;B",
+    "sudoc": "A B",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "titre-egal-normalise",
+    "champ": "Titre",
+    "syracuse": "ab",
+    "sudoc": "ab ",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "titre-inclusion",
+    "champ": "Titre",
+    "syracuse": "Les comptes de la nation",
+    "sudoc": "Les comptes de la nation 2022",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "titre-inclusion-chaine-vide",
+    "champ": "Titre",
+    "syracuse": ":",
+    "sudoc": "abc",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "titre-similarite",
+    "champ": "Titre",
+    "syracuse": "Le recensement de la population de 1954",
+    "sudoc": "Le recensement de la population de 1955",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "titre-similarite",
+    "champ": "Titre",
+    "syracuse": "Les comptes de la nation édition 2022",
+    "sudoc": "Les comptes de la nations édition 2022",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "titre-erreur",
+    "champ": "Titre",
+    "syracuse": "Statistiques agricoles",
+    "sudoc": "Comptes nationaux",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "titre-erreur",
+    "champ": "Titre",
+    "syracuse": "a",
+    "sudoc": "b",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "titre-sans-diacritiques",
+    "champ": "Titre",
+    "syracuse": "Économie",
+    "sudoc": "Economie",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "editeur-egal",
+    "champ": "Editeur",
+    "syracuse": "INSEE",
+    "sudoc": "Insee",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "editeur-egal",
+    "champ": "Editeur",
+    "syracuse": "Éditions du Seuil",
+    "sudoc": "Editions du Seuil",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "editeur-sim-haute",
+    "champ": "Editeur",
+    "syracuse": "La Découverte",
+    "sudoc": "Decouverte",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "editeur-sim-moyenne",
+    "champ": "Editeur",
+    "syracuse": "Gallimard",
+    "sudoc": "Gallimard Jeunesse",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "editeur-sim-moyenne",
+    "champ": "Editeur",
+    "syracuse": "Insee ; Eurostat",
+    "sudoc": "Insee : Eurostat",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "editeur-erreur",
+    "champ": "Editeur",
+    "syracuse": "Dunod",
+    "sudoc": "Hachette",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "editeur-seuil-085",
+    "champ": "Editeur",
+    "syracuse": "abcdefghijklmnopqrst",
+    "sudoc": "abcdefghijklmnopqruvwx",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "editeur-seuil-05",
+    "champ": "Editeur",
+    "syracuse": "abcdefghijk",
+    "sudoc": "abcdeflmnop",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "editeur-au-dessus-05",
+    "champ": "Editeur",
+    "syracuse": "abcdefghijk",
+    "sudoc": "abcdefglmnop",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "generique-egal",
+    "champ": "Collection",
+    "syracuse": "Insee références",
+    "sudoc": "Insee Références",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "generique-egal",
+    "champ": "Notes",
+    "syracuse": "a;b",
+    "sudoc": "a b",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "generique-egal",
+    "champ": "Prix",
+    "syracuse": "22 EUR",
+    "sudoc": "22 eur",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "generique-egal",
+    "champ": "Table des matières",
+    "syracuse": "Chap. 1 ; Chap. 2",
+    "sudoc": "Chap. 1 : Chap. 2",
+    "attendu_agent": "IDENTIQUE",
+    "statut": "IDENTIQUE",
+    "categorie": "OK"
+  },
+  {
+    "branche": "generique-seuil-09",
+    "champ": "Collection",
+    "syracuse": "abcdefghij",
+    "sudoc": "abcdefghijkl",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "generique-au-dessus-09",
+    "champ": "Collection",
+    "syracuse": "abcdefghij",
+    "sudoc": "abcdefghijk",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "generique-mineure",
+    "champ": "Résumé",
+    "syracuse": "Synthèse annuelle des comptes nationaux.",
+    "sudoc": "Synthèse annuelle des comptes nationaux",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "generique-mineure",
+    "champ": "Vedette matière - Nom commun",
+    "syracuse": "Économie rameau",
+    "sudoc": "Economie rameau",
+    "attendu_agent": "DIFFERENCE_MINEURE",
+    "statut": "DIFFERENCE_MINEURE",
+    "categorie": "MINEURE"
+  },
+  {
+    "branche": "generique-erreur",
+    "champ": "Résumé",
+    "syracuse": "Texte A",
+    "sudoc": "Texte B",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "generique-erreur",
+    "champ": "Description matérielle",
+    "syracuse": "1 volume (151 pages)",
+    "sudoc": "1 volume (151 pages) ill.",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  },
+  {
+    "branche": "generique-hors-bmp",
+    "champ": "Collection",
+    "syracuse": "😀😀",
+    "sudoc": "😀😁",
+    "attendu_agent": "ERREUR",
+    "statut": "ERREUR",
+    "categorie": "ERREUR"
+  }
+]
