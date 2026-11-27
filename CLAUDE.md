@@ -1,3 +1,7 @@
+**Refonte en cours sur cette branche** : la référence est `docs/refonte-python.md`.
+Les sections ci-dessous décrivent l'application TypeScript actuelle : elles restent
+valables comme source des règles métier, pas comme cible d'architecture.
+
 # CLAUDE.md — Guide de travail sur ce dépôt
 
 Ce fichier s'adresse à qui reprend le code, humain ou assistant IA. Il décrit
