@@ -1,0 +1,11 @@
+001 267670346
+003 http://www.sudoc.fr/267670346
+010 ##$a978-2-11-138080-8$bbr.$d22 EUR
+100 0#$a2022$f2022
+200 1#$aLes comptes de la nation$eédition 2022
+214 #0$cInsee$d2022
+215 ##$a1 vol. (151 p.)$cill.$d22 cm
+225 2#$aInsee références
+330 ##$aSynthèse annuelle des comptes nationaux.
+606 ##$aComptabilité nationale$xFrance
+700 #1$aLedoux$bPierre$f1932-2011$3026927438$4070

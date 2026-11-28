@@ -13,7 +13,7 @@ Règles de travail, à respecter pendant toute la refonte :
 - **Ce document est la référence.** Toute décision prise en cours de refonte y est reportée et le corrige ; en cas de divergence entre ce texte et une consigne orale, on corrige d'abord ce texte.
 - **Le TypeScript fait foi** pour les sorties de référence (section 10.2). Si un résultat diffère de ce que l'agent attendait, il signale l'écart au lieu de le corriger.
 - **Ne rien inventer en matière de règles métier.** Toute règle bibliothéconomique vient du code TypeScript existant, de `CLAUDE.md` ou de `docs/metier-unimarc-sudoc.md`. En cas de doute ou de contradiction, s'arrêter et poser la question, ne pas trancher.
-- **Conserver le comportement, pas forcément le code.** Les anomalies corrigées (A1 à A3) et les retraits assumés (R1, R2) de la section 4.6 sont les seules modifications de comportement autorisées.
+- **Conserver le comportement, pas forcément le code.** Les anomalies corrigées (A1 à A3, A7, A9, A10) et les retraits assumés (R1, R2) de la section 4.6 sont les seules modifications de comportement autorisées.
 - **Langue** : commentaires, docstrings, libellés d'interface, messages d'erreur et documentation en français. Identifiants de code en français quand ils désignent des notions métier (`notice`, `ecart`, `rattacher`), en anglais pour le vocabulaire technique standard.
 - **Avant chaque commit** : `uv run ruff format . && uv run ruff check . && uv run pytest -q`. Rien n'est commité si une commande échoue.
 - **Aucun accès réseau dans les tests.** Les appels au Sudoc et au LLM sont simulés.
@@ -121,7 +121,7 @@ Règles :
 - **Aucune autre dépendance** sans accord explicite. En particulier : pas de `rapidfuzz` ni d'équivalent (la similarité doit reproduire exactement `string-similarity`, section 4.3), pas de bibliothèque de graphiques, pas de framework CSS à compilation.
 - **Aucun CDN** : HTMX et Pico sont copiés dans le dépôt, avec leur numéro de version dans le nom de fichier (`htmx-2.0.4.min.js`). L'application doit fonctionner sans accès Internet côté navigateur.
 - **Aucun JavaScript écrit à la main**, sauf une exception tolérée de moins de 10 lignes, à justifier en commentaire.
-- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`. `[tool.uv] package = false` : l'application n'est pas installée comme paquet, elle se lance depuis la racine (`uv run uvicorn app.main:app`). Ruff : `line-length = 100`, règles par défaut plus `I`, `UP`, `B`. `pytest` : `pythonpath = ["."]`.
+- Python 3.12, projet géré par `uv` (`pyproject.toml` + `uv.lock` commités), conformément au skill `python-datascience`. `[tool.uv] package = false` : l'application n'est pas installée comme paquet, elle se lance depuis la racine (`uv run uvicorn app.main:app`). Ruff : `line-length = 100`, règles par défaut plus `I`, `UP`, `B` ; les fichiers `*.md` sont exclus du formatage (`[tool.ruff.format] exclude`), car `ruff format .` reformate sinon les blocs Python de la documentation, spec comprise. `pytest` : `pythonpath = ["."]`.
 - **`pytest-cov` n'est pas ajouté** pour l'instant (décision d'équipe, section 14).
 
 ### 3.2 Arborescence cible
@@ -253,14 +253,14 @@ La notice est toujours désignée par son **`identifiant` Syracuse**, jamais par
 - **Regex portées : ASCII uniquement.** `\d`, `\w`, `\s` et `\b` de JavaScript sont ASCII ; ceux de Python sont Unicode. Dans toute regex portée, utiliser `re.ASCII` ou des classes explicites (`[0-9]`). Concerne notamment `extract_idrefs`, l'année, `normalize_description`, la similarité. Note : `\s` de JavaScript inclut `U+FEFF`, pas les séparateurs `\x1c`-`\x1f` que `str.isspace()` de Python inclut ; les cas limites de `similarite.json` le vérifient.
 - **Longueurs UTF-16.** Quand une longueur ou un indice intervient dans un calcul (similarité, seuil de longueur, découpage par index), reproduire la mesure JavaScript (unités UTF-16), pas le nombre de points de code Python. Les références contiennent des caractères hors BMP pour le vérifier.
 - **Ordre des clés.** L'ordre d'insertion des clés de `parse_sudoc_record` détermine l'ordre des écarts, donc du CSV. Les tests comparent l'**ordre** des clés (liste), pas seulement l'égalité des dicts.
-- **Retours à la ligne dans les attributs.** `lxml` normalise `\n` et `\t` d'un attribut en espaces, `fast-xml-parser` non. Le comportement TypeScript est figé dans la référence (`syracuse-cas-limites.xml`). S'il s'avère impossible à reproduire proprement en Python, il sera accepté comme anomalie A6 (section 4.6) après vérification sur un vrai export Syracuse en recette, jamais avant.
+- **Entités numériques dans les attributs.** `fast-xml-parser` décode les entités nommées (`&amp;`, `&lt;`, `&quot;`…) mais **pas** les références numériques : `&#10;`, `&#9;` et `&#13;` restent le texte littéral `&#10;` (constaté dans `syracuse_cas_limites.json`). `lxml` les décode en vrais caractères. Le comportement TypeScript est figé dans la référence. Le reproduire en Python est possible (protéger `&#` en `&amp;#` avant l'analyse) mais l'export réécrirait alors `&amp;#10;` ; la décision (anomalie A6, section 4.6) attend la vérification sur un vrai export Syracuse (`grep '&#'`). En attendant, le comportement TypeScript est figé.
 - **Export XML : libellés trimés, comportement conservé.** Le libellé `Auteur principal - Collectivité ` est écrit à l'export **sans** son espace final, parce que le parseur le trime. Ce comportement est conservé.
 - **Libellés Syracuse tels quels**, fautes comprises (`Auteur secondaire- Collectivité`, `Nom - Responsabiblité`).
 - **Zones UNIMARC** mappées dans `parse_sudoc_record` : 200, 010, 214/210, 215, 225, 330, 327, 700/701/702, 710/711/712, 600/601/606/607/608, 300-305.
 - **Décodage de la zone 100** dans `unimarc_xml_to_text` : porté ligne à ligne, sans simplification.
 - **Suffixe `  rameau `** sur les vedettes ajoutées.
 - **Seuils** : titre et champs génériques > 0,9 ⇒ DIFFERENCE\_MINEURE (titre : aussi si l'une contient l'autre) ; `Editeur` > 0,85 ⇒ IDENTIQUE, > 0,5 ⇒ DIFFERENCE\_MINEURE ; ISBN sans tirets ; EAN sans espaces ; année sur 4 chiffres ; auteurs : l'IdRef fait foi.
-- **Normalisation** (`normalize_string`) : minuscules, `;` et `:` → espace, apostrophes typographiques → `'`, espace insécable → espace, blancs multiples réduits, trim. `remove_accents` : décomposition NFD puis suppression des diacritiques combinants (U+0300 à U+036F).
+- **Normalisation** (`normalize_string`) : minuscules, `;` et `:` → espace, apostrophes typographiques → `'` (intention ; le TypeScript actuel ne le fait pas, voir A9 : la regex `/['']/g` de `compare.ts` ne contient que des apostrophes droites et n'a aucun effet), espace insécable → espace, blancs multiples réduits, trim. `remove_accents` : décomposition NFD puis suppression des diacritiques combinants (U+0300 à U+036F).
 - **Pause de 500 ms** entre deux notices.
 - **Endpoints ABES** : SRU `https://www.sudoc.abes.fr/cbs/sru/…`, notice `https://www.sudoc.fr/{PPN}.xml`, fusion `…/services/merged/{PPN}` (URL exactes reprises de `marc.ts`).
 - **Export TXT** : `HOLDINGS_TAGS` et `EXCLUDED_TAGS` filtrés ; indicateurs sur deux caractères, `#` pour un espace ou une chaîne vide.
@@ -271,14 +271,18 @@ La notice est toujours désignée par son **`identifiant` Syracuse**, jamais par
 
 ### 4.6 Anomalies existantes, retraits assumés
 
-Les corrections A1 à A3 et les retraits R1 et R2 sont les seules modifications de comportement permises. Chaque correction est un commit séparé avec un test qui la démontre.
+Les corrections A1 à A3, A7, A9 et A10, et les retraits R1 et R2, sont les seules modifications de comportement permises. Chaque correction est un commit séparé avec un test qui la démontre. Quand une correction change une sortie de référence (section 10.2), les lignes concernées de `tests/reference/` sont remplacées dans ce même commit, avec la différence expliquée ; le reste reste comparé à l'octet près. Les anomalies A5, A6 et A8 sont signalées et leur comportement est conservé.
 
 - **A1 — Statut incohérent après dévalidation.** La route `/valider` remet `DIFFERENCE_MINEURE` comme statut de notice, alors que la vérification et le résumé utilisent `MINEURE`. Une notice dévalidée disparaît donc du compteur « mineures ». Correction : utiliser `MINEURE`.
 - **A2 — Paramètres mal nommés.** Trois routes nomment `:ppn` un identifiant Syracuse. Disparaît de fait avec les nouvelles routes (section 6).
 - **A3 — Double sens d'ABSENT\_SUDOC.** Le statut d'écart (« champ vide côté Sudoc ») et le statut de notice (« PMB introuvable ») partagent la même valeur. Les deux énumérations séparées de la section 4.2 lèvent l'ambiguïté dans le code ; les valeurs texte restent identiques.
 - **A4 — Recherche approfondie.** Le bouton passe la notice en ABSENT\_SUDOC pour afficher le panneau de recherche manuelle. Le comportement est conservé (A4 n'est **pas** corrigée), mais la fonction porte un nom explicite (`passer_en_recherche_manuelle`) et un commentaire signale le couplage. À rediscuter avec la documentaliste (section 14).
 - **A5 — Dévalidation d'une notice qui n'était pas en écart (signalée, NON corrigée).** `basculer_validation` ramène une notice dévalidée à `OK` (catégorie A) ou `RATTACHE_SRU` (catégorie B), quel que soit son statut d'origine. Une notice A en `NON_TROUVE`, validée puis dévalidée, devient donc `OK` ; une notice B en `EN_ATTENTE_RATTACHEMENT` ou `ABSENT_SUDOC` devient `RATTACHE_SRU`. Le comportement est reproduit tel quel et documenté en commentaire ; la question est posée à la documentaliste (section 14).
-- **A6 — Retours à la ligne dans les attributs (éventuelle, non décidée).** À n'ouvrir que si la reproduction du comportement de `fast-xml-parser` s'avère impossible proprement (section 4.5) ; décision après vérification sur un vrai export en recette.
+- **A6 — Entités numériques non décodées (éventuelle, non décidée).** `fast-xml-parser` laisse `&#10;`, `&#9;`, `&#13;` sous forme de texte littéral dans les attributs, là où `lxml` produit de vrais caractères (section 4.5). Décision après vérification sur un vrai export Syracuse (`grep '&#'`) : si ces références n'y figurent pas, la différence est sans effet ; sinon, choisir entre reproduire le texte littéral et décoder. En attendant, le comportement TypeScript reste figé.
+- **A7 — Export TXT : une zone absorbe la suivante (CORRIGÉE en phase 3).** La regex de remplacement de `buildTxtExport` (`^(tag ..\$code)[^\$]*`) accepte les retours à la ligne : quand la sous-zone remplacée est la dernière de sa zone, elle absorbe la ligne suivante jusqu'au prochain `$` (observé : la 330 absorbe la 606). Correction : le remplacement s'arrête à la fin de la ligne. Phase 3, commit séparé ; les tests décrivent la sortie attendue (aucune zone ne doit absorber la suivante) ; les lignes concernées de `export.txt` sont remplacées par la version corrigée.
+- **A8 — Export TXT : sous-zones non initiales jamais remplacées (signalée, NON corrigée).** Le remplacement ne cherche que la première sous-zone après les indicateurs : `Publié le` (214 `$d`) et `Prix` (010 `$d`) ne sont jamais trouvés et une ligne en doublon est ajoutée en fin de notice (`214 ##$d2022`). Comportement reproduit et commenté ; question à la documentaliste (section 14).
+- **A9 — Apostrophe typographique non unifiée (CORRIGÉE en phase 2).** `normalize_string` devait unifier l'apostrophe typographique `’` avec `'` (intention documentée), mais la regex de `compare.ts` ne contient que des apostrophes droites. Conséquence : « L’économie » et « L'économie » donnent `ERREUR`. Correction : unifier réellement. Phase 2, commit séparé, avec test ; les triplets et écarts de référence concernés sont régénérés dans ce commit, différence expliquée.
+- **A10 — Contrôlechamp vide exporté `[object Object]` (CORRIGÉE en phase 1).** Un `<controlfield>` sans texte mais avec attributs produit la ligne `003 [object Object]` dans `unimarc_xml_to_text`. Correction : valeur vide (la ligne est omise, comme pour tout contrôlechamp vide). Phase 1, commit séparé, avec test ; `unimarc_cas_limites.txt` est mis à jour dans ce commit.
 
 **Retraits assumés** (fonctionnalités de la version 1.4.0 qui disparaissent volontairement) :
 
@@ -516,7 +520,7 @@ Règles de génération :
 - **Le TypeScript fait foi.** Pour chaque triplet de `compare_fields.json`, le script consigne aussi le statut que l'agent attendait d'après sa lecture du code. En cas d'écart, le script ne corrige rien : il signale l'écart (affichage et champ `attendu_agent` du fichier), la valeur du TypeScript est celle qui est enregistrée, et l'agent en informe l'équipe.
 - **Aucun accès réseau** : le script remplace `axios.get` et `axios.post` par une fonction qui lève une erreur.
 - **Logique des décisions recopiée à l'identique.** Les routes de `server/index.ts` ne sont pas appelables (le fichier lance le serveur à l'import). Le script en recopie la logique à l'identique (valider, rattacher, absent, action, bulk-action, add-keyword), avec en commentaire les numéros de lignes d'origine. `server/index.ts` n'est pas modifié. Pour le rattachement, le XML Sudoc vient d'une fixture au lieu de `fetchSudocRecord`.
-- **Fixtures de cas limites**, synthétiques uniquement, sans aucune donnée réelle : `tests/fixtures/syracuse-cas-limites.xml` (entités, `&#10;`, espaces de bord sur nom, valeur et attributs, propriété sans `value`, noms en double, item sans `Identifiant`, `type` absent, PPN avec zéro initial ou `X`, `Filtre` en minuscules) et `tests/fixtures/sudoc-cas-limites.xml` (une zone ou plusieurs, 210 au lieu de 214, sous-zone vide, texte avec espaces de bord, zone 100 de chaque code `a b d e f g h j` et d'un code inconnu, dates invalides, 073 présent, ISBN-10, 215 sans `$c`, 183 présent, vedettes 600 à 608, 701/702/710-712 multiples). Fichiers de référence supplémentaires : `ecarts_cas_limites.json`, `unimarc_cas_limites.txt`, `export_decisions.json` (jeu de décisions rejoué par les tests Python). Les fichiers exigés par le tableau restent construits sur les fixtures actuelles.
+- **Fixtures de cas limites**, synthétiques uniquement, sans aucune donnée réelle : `tests/fixtures/syracuse-cas-limites.xml` (entités, `&#10;`, espaces de bord sur nom, valeur et attributs, propriété sans `value`, noms en double, item sans `Identifiant`, `type` absent, PPN avec zéro initial ou `X`, `Filtre` en minuscules) et `tests/fixtures/sudoc-cas-limites.xml` (une zone ou plusieurs, 210 au lieu de 214, sous-zone vide, texte avec espaces de bord, zone 100 de chaque code `a b d e f g h j` et d'un code inconnu, dates invalides, 073 présent, ISBN-10, 215 sans `$c`, 183 présent, vedettes 600 à 608, 701/702/710-712 multiples). Fichiers de référence supplémentaires : `syracuse_cas_limites.json`, `sudoc_cas_limites.json`, `ecarts_cas_limites.json`, `unimarc_cas_limites.txt`, `export_decisions.json` (jeu de décisions rejoué par les tests Python). Les fichiers exigés par le tableau restent construits sur les fixtures actuelles.
 - **Format neutre** : `syracuse.json` écrit les propriétés en `{name, value, rank, referentialType, referentialName}` (`null` si l'attribut est absent) ; `parsedXml` n'y figure pas. Les autres sorties gardent les clés camelCase du TypeScript, les tests Python convertissent.
 - **`ecarts.json`** couvre la notice A, les deux notices B comparées à la fixture Sudoc (simulation d'un rattachement) et la notice A contre des variantes de Sudoc.
 - **Déterminisme** : pas de date ni d'aléatoire ; deux exécutions successives produisent des fichiers identiques.
@@ -700,12 +704,12 @@ Prérequis : Node.js 20 ou plus, pour exécuter l'ancien code et `generer_refere
 
 Fichiers de la phase : `pyproject.toml`, `uv.lock`, `.python-version`, `app/__init__.py`, `app/metier/__init__.py`, `tests/test_architecture.py`, `tests/test_reference.py`, `tests/fixtures/` (copies et fixtures de cas limites), `tests/reference/`, `scripts/generer_reference.ts`, `.gitignore` complété, `.gitattributes` (`tests/reference/** -text`, pour que la comparaison à l'octet près ne soit pas faussée par une conversion de fins de ligne). Le TypeScript n'est pas modifié.
 
-- [ ] `uv sync` et `uv run pytest -q` s'exécutent sans erreur ; `uv lock --check` passe.
-- [ ] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets) ; `test_reference.py` le vérifie.
-- [ ] `npm test` passe toujours, avec le même nombre de cas qu'au départ (102) ; `git diff --stat -- server src test package.json package-lock.json` est vide.
-- [ ] `test_architecture.py` est en place, avec son test négatif.
-- [ ] Deux exécutions consécutives de `generer_reference.ts` ne changent aucun fichier (`git diff --exit-code tests/reference`).
-- [ ] Les écarts éventuels entre les statuts attendus par l'agent et ceux du TypeScript sont listés dans la description de la merge request.
+- [x] `uv sync` et `uv run pytest -q` s'exécutent sans erreur ; `uv lock --check` passe.
+- [x] Tous les fichiers de la table 10.2 existent, avec les volumes minimaux demandés (30 paires, 60 triplets) ; `test_reference.py` le vérifie.
+- [x] `npm test` passe toujours, avec le même nombre de cas qu'au départ (102) ; `git diff --stat -- server src test package.json package-lock.json` est vide.
+- [x] `test_architecture.py` est en place, avec son test négatif.
+- [x] Deux exécutions consécutives de `generer_reference.ts` ne changent aucun fichier (`git diff --exit-code tests/reference`).
+- [x] Les écarts éventuels entre les statuts attendus par l'agent et ceux du TypeScript sont listés dans la description de la merge request.
 
 ### Phase 1 — Fondations métier hors réseau
 
@@ -714,6 +718,7 @@ Fichiers de la phase : `pyproject.toml`, `uv.lock`, `.python-version`, `app/__in
 - [ ] `compare_two_strings` égale la référence sur toutes les paires (tolérance 1e-12).
 - [ ] `parse_syracuse_notices` et `parse_sudoc_xml` égalent `syracuse.json` et `sudoc.json`.
 - [ ] `unimarc_xml_to_text` égale `unimarc.txt` à l'octet près.
+- [ ] L'anomalie A10 a son propre commit et son test ; `unimarc_cas_limites.txt` est mis à jour dans ce commit.
 - [ ] Les cas portés de `marc.test.ts` et `syracuse.test.ts` passent.
 
 ### Phase 2 — Comparaison, accès Sudoc, vérification, décisions
@@ -724,12 +729,14 @@ Fichiers de la phase : `pyproject.toml`, `uv.lock`, `.python-version`, `app/__in
 - [ ] Les cas portés de `compare.test.ts` passent.
 - [ ] `test_verification.py` couvre toutes les pistes listées en 10.3.
 - [ ] `test_decisions.py` couvre chaque règle de 4.4 ; l'anomalie A1 a son propre commit et son test.
+- [ ] L'anomalie A9 a son propre commit et son test ; les entrées de `compare_fields.json` et `ecarts*.json` touchées par l'apostrophe sont régénérées dans ce commit, différence expliquée.
 
 ### Phase 3 — Exports et RAMEAU
 
 `exports.py`, `rameau.py`.
 
-- [ ] Les trois exports égalent `export.xml`, `export.csv`, `export.txt` à l'octet près.
+- [ ] `export.xml` et `export.csv` égalent la référence à l'octet près ; `export.txt` aussi, sauf les lignes concernées par A7, remplacées par la version corrigée dans le commit de A7.
+- [ ] L'anomalie A7 a son propre commit et ses tests (aucune zone n'absorbe la suivante) ; A8 est reproduite et commentée dans le code.
 - [ ] Les cas portés de `exports.test.ts` passent ; `tests/CORRESPONDANCE.md` couvre tous les cas de `test/*.test.ts` (une ligne par cas, nombre vérifié contre `npm test`).
 - [ ] Les prompts RAMEAU sont identiques caractère pour caractère à ceux de `server/index.ts` (test de comparaison de chaînes).
 
@@ -781,7 +788,8 @@ Décisions ouvertes, à trancher par l'équipe et non par l'agent :
 | Namespace | L'application tourne dans le namespace personnel `user-mhillion`. | Migrer vers un namespace de projet SSP Cloud quand il existera |
 | Recherche approfondie (A4) | Le passage en ABSENT\_SUDOC pour ouvrir la recherche manuelle convient-il à la documentaliste ? | Conserver tel quel, poser la question en recette |
 | Dévalidation (A5) | Une notice dévalidée revient à `OK` (A) ou `RATTACHE_SRU` (B) quel que soit son statut d'origine : une notice A `NON_TROUVE` validée puis dévalidée devient `OK`. Est-ce acceptable ? | Conserver tel quel, poser la question en recette |
-| Retours à la ligne (A6) | Les `\n` dans les attributs d'un vrai export Syracuse sont-ils réels (Résumé multi-lignes) ? | Vérifier en recette sur un vrai export avant d'accepter A6 |
+| Entités numériques (A6) | Un vrai export Syracuse contient-il des références numériques (`&#10;`…) dans ses attributs ? | `grep '&#'` sur un vrai export avant de décider ; comportement TypeScript figé d'ici là |
+| Export TXT, sous-zones non initiales (A8) | `Publié le` et `Prix` ne remplacent pas la valeur de la notice Sudoc : une ligne en doublon est ajoutée (`214 ##$d2022`). La documentaliste le constate-t-elle à l'usage dans WINIBW ? Faut-il corriger ? | Conserver tel quel, poser la question en recette |
 | Endpoint LLM (R1) | Décidé : non modifiable depuis l'interface, variable `LLM_ENDPOINT` uniquement | Tranché |
 | Couverture de tests | Ajouter `pytest-cov` en dépendance de développement ? | Non pour l'instant (décision prise) |
 | Hébergement du dépôt | Rester sur GitHub (InseeFrLab) avec ghcr.io, ou passer sur la forge interne ? | Rester sur GitHub tant que l'application est sur le SSP Cloud |

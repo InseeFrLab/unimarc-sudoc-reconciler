@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Notice UNIMARC SYNTHÉTIQUE de cas limites (aucune donnée réelle). Sert à
+     figer le comportement du parseur TypeScript : zone 210 au lieu de 214,
+     sous-zone vide, texte à espaces de bord, vedettes et auteurs multiples,
+     073 présent, ISBN-10, 215 sans $c, 183 présent, controlfields vides. -->
+<record>
+  <leader>cam0 22        450 </leader>
+  <controlfield tag="001">026927438</controlfield>
+  <controlfield tag="003">   </controlfield>
+  <controlfield tag="005">20240101000000.0</controlfield>
+  <datafield tag="010" ind1=" " ind2=" ">
+    <subfield code="a">2-11-138080-1</subfield>
+    <subfield code="b">rel.</subfield>
+  </datafield>
+  <datafield tag="073" ind1=" " ind2="0">
+    <subfield code="a">9782111380801</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101a20192021k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101b2019    k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101d2019    k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101e2019    k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101f2019uuuuk  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101g20192021k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101h20192018k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101j2019    k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101z2019    k  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">20240101hXXXXXXXXk  y0frey50      ba</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">court</subfield>
+  </datafield>
+  <datafield tag="183" ind1=" " ind2=" ">
+    <subfield code="a">nga</subfield>
+  </datafield>
+  <datafield tag="200" ind1="1" ind2=" ">
+    <subfield code="a">  Titre à espaces de bord  </subfield>
+    <subfield code="e"></subfield>
+  </datafield>
+  <datafield tag="210" ind1=" " ind2=" ">
+    <subfield code="c">Éditions &amp; Cie</subfield>
+    <subfield code="d">2019</subfield>
+  </datafield>
+  <datafield tag="215" ind1=" " ind2=" ">
+    <subfield code="a">220 p.</subfield>
+    <subfield code="d">24 cm</subfield>
+  </datafield>
+  <datafield tag="225" ind1="2" ind2=" ">
+    <subfield code="a">Collection un</subfield>
+  </datafield>
+  <datafield tag="225" ind1="2" ind2=" ">
+    <subfield code="a">Collection deux</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">Première note</subfield>
+  </datafield>
+  <datafield tag="305" ind1=" " ind2=" ">
+    <subfield code="a">Seconde note</subfield>
+  </datafield>
+  <datafield tag="327" ind1="1" ind2=" ">
+    <subfield code="a">Chapitre 1 ; Chapitre 2</subfield>
+  </datafield>
+  <datafield tag="330" ind1=" " ind2=" ">
+    <subfield code="a">Résumé sur
+deux lignes.</subfield>
+  </datafield>
+  <datafield tag="600" ind1=" " ind2="1">
+    <subfield code="a">Dupont</subfield>
+    <subfield code="b">Jean</subfield>
+    <subfield code="f">1900-1980</subfield>
+  </datafield>
+  <datafield tag="601" ind1="2" ind2=" ">
+    <subfield code="a">Insee</subfield>
+    <subfield code="b">Direction générale</subfield>
+  </datafield>
+  <datafield tag="606" ind1=" " ind2=" ">
+    <subfield code="a">Statistique</subfield>
+    <subfield code="x">Méthodes</subfield>
+    <subfield code="y">20e siècle</subfield>
+    <subfield code="z">France</subfield>
+  </datafield>
+  <datafield tag="606" ind1=" " ind2=" ">
+    <subfield code="a">Économie</subfield>
+  </datafield>
+  <datafield tag="607" ind1=" " ind2=" ">
+    <subfield code="a">France</subfield>
+    <subfield code="x">Histoire</subfield>
+  </datafield>
+  <datafield tag="608" ind1=" " ind2=" ">
+    <subfield code="a">Annuaire</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2="1">
+    <subfield code="a">Martin</subfield>
+    <subfield code="b">Paul</subfield>
+    <subfield code="3">070123456</subfield>
+    <subfield code="4">070</subfield>
+  </datafield>
+  <datafield tag="701" ind1=" " ind2="1">
+    <subfield code="a">Durand</subfield>
+    <subfield code="b">Anne</subfield>
+    <subfield code="3">12345678X</subfield>
+  </datafield>
+  <datafield tag="701" ind1=" " ind2="1">
+    <subfield code="a">Petit</subfield>
+    <subfield code="b">Luc</subfield>
+  </datafield>
+  <datafield tag="702" ind1=" " ind2="1">
+    <subfield code="a">Moreau</subfield>
+    <subfield code="b">Claire</subfield>
+    <subfield code="4">340</subfield>
+  </datafield>
+  <datafield tag="710" ind1="2" ind2=" ">
+    <subfield code="a">Insee</subfield>
+    <subfield code="3">026927438</subfield>
+  </datafield>
+  <datafield tag="711" ind1="2" ind2=" ">
+    <subfield code="a">Congrès</subfield>
+    <subfield code="b">Paris</subfield>
+  </datafield>
+  <datafield tag="712" ind1="2" ind2=" ">
+    <subfield code="a">Éditions A</subfield>
+  </datafield>
+  <datafield tag="712" ind1="2" ind2=" ">
+    <subfield code="a">Éditions B</subfield>
+  </datafield>
+  <datafield tag="915" ind1=" " ind2=" ">
+    <subfield code="a">Exemplaire à filtrer</subfield>
+  </datafield>
+  <datafield tag="999" ind1=" " ind2=" ">
+    <subfield code="a">Autre exemplaire</subfield>
+  </datafield>
+</record>

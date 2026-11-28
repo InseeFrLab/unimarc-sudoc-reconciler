@@ -1,0 +1,489 @@
+[
+  {
+    "identifiant": "SYR-001",
+    "sudoc": "sudoc-267670346",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Les comptes de la nation : édition 2022",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Ledoux, Pierre (1932-2011) 026927438",
+        "valeurSudoc": "Ledoux Pierre 1932-2011 026927438 070",
+        "statut": "DIFFERENCE_MINEURE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "INSEE",
+        "valeurSudoc": "Insee",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "C 2022",
+        "valeurSudoc": "2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "ISBN",
+        "valeurSyracuse": "9782111380808",
+        "valeurSudoc": "978-2-11-138080-8",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "EAN",
+        "valeurSyracuse": "",
+        "valeurSudoc": "9782111380808",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      },
+      {
+        "champ": "Description matérielle",
+        "valeurSyracuse": "1 vol. (151 p.) Tableaux 22 cm",
+        "valeurSudoc": "1 volume (151 pages) ill., Tableaux 22 cm",
+        "statut": "FUSION",
+        "action": "ACCEPTER",
+        "unimarc": {
+          "tag": "215",
+          "subfields": {
+            "a": "1 volume (151 pages)",
+            "c": "ill., Tableaux",
+            "d": "22 cm"
+          }
+        }
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "",
+        "valeurSudoc": "Synthèse annuelle des comptes nationaux.",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Comptabilité nationale France rameau",
+        "valeurSudoc": "Comptabilité nationale France rameau",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Type de support (183)",
+        "valeurSyracuse": "",
+        "valeurSudoc": "183 ##$P01$anga",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      }
+    ],
+    "nbErreurs": 0,
+    "nbComplements": 1,
+    "nbMineures": 1
+  },
+  {
+    "identifiant": "SYR-002",
+    "sudoc": "sudoc-267670346",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "La comptabilité des entreprises en France",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Martin, Paul",
+        "valeurSudoc": "Ledoux Pierre 1932-2011 026927438 070",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "1965",
+        "valeurSudoc": "2022",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Type de support (183)",
+        "valeurSyracuse": "",
+        "valeurSudoc": "183 ##$P01$anga",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      }
+    ],
+    "nbErreurs": 3,
+    "nbComplements": 0,
+    "nbMineures": 0
+  },
+  {
+    "identifiant": "SYR-003",
+    "sudoc": "sudoc-267670346",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Le recensement de la population de 1954",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "1956",
+        "valeurSudoc": "2022",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Collectivité",
+        "valeurSyracuse": "Institut national de la statistique",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Type de support (183)",
+        "valeurSyracuse": "",
+        "valeurSudoc": "183 ##$P01$anga",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      }
+    ],
+    "nbErreurs": 2,
+    "nbComplements": 0,
+    "nbMineures": 0
+  },
+  {
+    "identifiant": "SYR-001",
+    "sudoc": "fixture-avec-073-et-183",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Les comptes de la nation : édition 2022",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Ledoux, Pierre (1932-2011) 026927438",
+        "valeurSudoc": "Ledoux Pierre 1932-2011 026927438 070",
+        "statut": "DIFFERENCE_MINEURE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "INSEE",
+        "valeurSudoc": "Insee",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "C 2022",
+        "valeurSudoc": "2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "ISBN",
+        "valeurSyracuse": "9782111380808",
+        "valeurSudoc": "978-2-11-138080-8",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "EAN",
+        "valeurSyracuse": "",
+        "valeurSudoc": "9782111380808",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Description matérielle",
+        "valeurSyracuse": "1 vol. (151 p.) Tableaux 22 cm",
+        "valeurSudoc": "1 volume (151 pages) ill., Tableaux 22 cm",
+        "statut": "FUSION",
+        "action": "ACCEPTER",
+        "unimarc": {
+          "tag": "215",
+          "subfields": {
+            "a": "1 volume (151 pages)",
+            "c": "ill., Tableaux",
+            "d": "22 cm"
+          }
+        }
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "",
+        "valeurSudoc": "Synthèse annuelle des comptes nationaux.",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Comptabilité nationale France rameau",
+        "valeurSudoc": "Comptabilité nationale France rameau",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 0,
+    "nbComplements": 2,
+    "nbMineures": 1
+  },
+  {
+    "identifiant": "SYR-001",
+    "sudoc": "fixture-215-sans-illustration",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Les comptes de la nation : édition 2022",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Ledoux, Pierre (1932-2011) 026927438",
+        "valeurSudoc": "Ledoux Pierre 1932-2011 026927438 070",
+        "statut": "DIFFERENCE_MINEURE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "INSEE",
+        "valeurSudoc": "Insee",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "C 2022",
+        "valeurSudoc": "2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "ISBN",
+        "valeurSyracuse": "9782111380808",
+        "valeurSudoc": "978-2-11-138080-8",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "EAN",
+        "valeurSyracuse": "",
+        "valeurSudoc": "9782111380808",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      },
+      {
+        "champ": "Description matérielle",
+        "valeurSyracuse": "1 vol. (151 p.) Tableaux 22 cm",
+        "valeurSudoc": "1 volume (151 pages) Tableaux 22 cm",
+        "statut": "FUSION",
+        "action": "ACCEPTER",
+        "unimarc": {
+          "tag": "215",
+          "subfields": {
+            "a": "1 volume (151 pages)",
+            "c": "Tableaux",
+            "d": "22 cm"
+          }
+        }
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "",
+        "valeurSudoc": "Synthèse annuelle des comptes nationaux.",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Comptabilité nationale France rameau",
+        "valeurSudoc": "Comptabilité nationale France rameau",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Type de support (183)",
+        "valeurSyracuse": "",
+        "valeurSudoc": "183 ##$P01$anga",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      }
+    ],
+    "nbErreurs": 0,
+    "nbComplements": 1,
+    "nbMineures": 1
+  },
+  {
+    "identifiant": "SYR-001",
+    "sudoc": "fixture-isbn-10",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Les comptes de la nation : édition 2022",
+        "valeurSudoc": "Les comptes de la nation édition 2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Ledoux, Pierre (1932-2011) 026927438",
+        "valeurSudoc": "Ledoux Pierre 1932-2011 026927438 070",
+        "statut": "DIFFERENCE_MINEURE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "INSEE",
+        "valeurSudoc": "Insee",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "C 2022",
+        "valeurSudoc": "2022",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "ISBN",
+        "valeurSyracuse": "9782111380808",
+        "valeurSudoc": "2-11-138080-1",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "EAN",
+        "valeurSyracuse": "",
+        "valeurSudoc": "",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Description matérielle",
+        "valeurSyracuse": "1 vol. (151 p.) Tableaux 22 cm",
+        "valeurSudoc": "1 volume (151 pages) ill., Tableaux 22 cm",
+        "statut": "FUSION",
+        "action": "ACCEPTER",
+        "unimarc": {
+          "tag": "215",
+          "subfields": {
+            "a": "1 volume (151 pages)",
+            "c": "ill., Tableaux",
+            "d": "22 cm"
+          }
+        }
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "",
+        "valeurSudoc": "Synthèse annuelle des comptes nationaux.",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Comptabilité nationale France rameau",
+        "valeurSudoc": "Comptabilité nationale France rameau",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Type de support (183)",
+        "valeurSyracuse": "",
+        "valeurSudoc": "183 ##$P01$anga",
+        "statut": "GENERE_AUTO",
+        "action": "ACCEPTER"
+      }
+    ],
+    "nbErreurs": 1,
+    "nbComplements": 1,
+    "nbMineures": 1
+  },
+  {
+    "identifiant": "SYR-001",
+    "sudoc": "aucune-donnee-sudoc",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Les comptes de la nation : édition 2022",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Personne physique",
+        "valeurSyracuse": "Ledoux, Pierre (1932-2011) 026927438",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "INSEE",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "C 2022",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "ISBN",
+        "valeurSyracuse": "9782111380808",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "EAN",
+        "valeurSyracuse": "",
+        "valeurSudoc": "",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Description matérielle",
+        "valeurSyracuse": "1 vol. (151 p.) Tableaux 22 cm",
+        "valeurSudoc": "1 volume (151 pages) Tableaux 22 cm",
+        "statut": "NORMALISE",
+        "action": "ACCEPTER"
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "",
+        "valeurSudoc": "",
+        "statut": "IDENTIQUE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Comptabilité nationale France rameau",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 0,
+    "nbComplements": 0,
+    "nbMineures": 0
+  }
+]

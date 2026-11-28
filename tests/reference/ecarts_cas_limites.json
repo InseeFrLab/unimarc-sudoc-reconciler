@@ -1,0 +1,128 @@
+[
+  {
+    "identifiant": "LIM-001",
+    "sudoc": "sudoc-cas-limites",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Études & essais : \"économie\" <2022>",
+        "valeurSudoc": "Titre à espaces de bord",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Résumé",
+        "valeurSyracuse": "Première ligne&#10;Deuxième ligne&#9;avec tabulation&#13;&#10;Fin",
+        "valeurSudoc": "Résumé sur\ndeux lignes.",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Auteur principal - Collectivité",
+        "valeurSyracuse": "Institut national",
+        "valeurSudoc": "Insee 026927438",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Editeur",
+        "valeurSyracuse": "Insee",
+        "valeurSudoc": "Éditions & Cie",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Notes",
+        "valeurSyracuse": "",
+        "valeurSudoc": "Première note ; Seconde note",
+        "statut": "MANQUANT_SYRACUSE",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Collection",
+        "valeurSyracuse": "Première",
+        "valeurSudoc": "Collection un ; Collection deux",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Collection",
+        "valeurSyracuse": "Seconde",
+        "valeurSudoc": "Collection un ; Collection deux",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Vedette matière - Nom commun",
+        "valeurSyracuse": "Économie rameau",
+        "valeurSudoc": "Statistique Méthodes 20e siècle France rameau; Économie rameau",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 7,
+    "nbComplements": 1,
+    "nbMineures": 0
+  },
+  {
+    "identifiant": "LIM-002",
+    "sudoc": "sudoc-cas-limites",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Notice sans attribut type, PPN terminé par X",
+        "valeurSudoc": "Titre à espaces de bord",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 1,
+    "nbComplements": 0,
+    "nbMineures": 0
+  },
+  {
+    "identifiant": "LIM-004",
+    "sudoc": "sudoc-cas-limites",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Identifiant de huit caractères terminé par X",
+        "valeurSudoc": "Titre à espaces de bord",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "champ": "Publié le",
+        "valeurSyracuse": "1998",
+        "valeurSudoc": "2019",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 2,
+    "nbComplements": 0,
+    "nbMineures": 0
+  },
+  {
+    "identifiant": "LIM-005",
+    "sudoc": "sudoc-cas-limites",
+    "ecarts": [
+      {
+        "champ": "Titre",
+        "valeurSyracuse": "Identifiant d'origine vide",
+        "valeurSudoc": "Titre à espaces de bord",
+        "statut": "ERREUR",
+        "action": "CONSERVER"
+      },
+      {
+        "valeurSyracuse": "valeur sans nom",
+        "valeurSudoc": "",
+        "statut": "ABSENT_SUDOC",
+        "action": "CONSERVER"
+      }
+    ],
+    "nbErreurs": 1,
+    "nbComplements": 0,
+    "nbMineures": 0
+  }
+]

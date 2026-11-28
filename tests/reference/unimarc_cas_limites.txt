@@ -1,0 +1,40 @@
+001 026927438
+003 [object Object]
+010 ##$a2-11-138080-1$brel.
+073 #0$a9782111380801
+100 1#$a2019$b2021
+100 1#$a2019
+100 0#$a2019
+100 0#$a2019
+100 1#$a2019
+100 0#$a2019$b2021
+100 0#$a2019$f2018
+100 0#$a2019
+100 ##$a2019
+100 0#$aXXXX$fXXXX
+100 ##$acourt
+183 ##$anga
+200 1#$aTitre à espaces de bord$e
+210 ##$cÉditions & Cie$d2019
+215 ##$a220 p.$d24 cm
+225 2#$aCollection un
+225 2#$aCollection deux
+300 ##$aPremière note
+305 ##$aSeconde note
+327 1#$aChapitre 1 ; Chapitre 2
+330 ##$aRésumé sur
+deux lignes.
+600 #1$aDupont$bJean$f1900-1980
+601 2#$aInsee$bDirection générale
+606 ##$aStatistique$xMéthodes$y20e siècle$zFrance
+606 ##$aÉconomie
+607 ##$aFrance$xHistoire
+608 ##$aAnnuaire
+700 #1$aMartin$bPaul$3070123456$4070
+701 #1$aDurand$bAnne$312345678X
+701 #1$aPetit$bLuc
+702 #1$aMoreau$bClaire$4340
+710 2#$aInsee$3026927438
+711 2#$aCongrès$bParis
+712 2#$aÉditions A
+712 2#$aÉditions B

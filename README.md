@@ -66,6 +66,11 @@ Il n'y a **pas de base de données** : chaque traitement vit en mémoire le temp
 la session (un fichier en entrée, un fichier en sortie). Un redémarrage du serveur
 efface les sessions en cours.
 
+> **Refonte Python en cours** sur la branche `refonte-python` : spécification dans
+> [docs/refonte-python.md](docs/refonte-python.md). Préparation (phase 0) : sorties de
+> référence générées depuis le code TypeScript, voir
+> [tests/reference/README.md](tests/reference/README.md).
+
 ## Documentation
 
 | Vous cherchez… | Voir |

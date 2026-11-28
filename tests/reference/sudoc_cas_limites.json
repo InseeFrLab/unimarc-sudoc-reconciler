@@ -1,0 +1,31 @@
+{
+  "titre": "Titre à espaces de bord",
+  "isbn": "2-11-138080-1",
+  "prix": "",
+  "reliure": "relié",
+  "ean": "9782111380801",
+  "hasTypeSupport": true,
+  "editeur": "Éditions & Cie",
+  "annee": "2019",
+  "descriptionMaterielle": "1 volume (220 pages) 24 cm",
+  "collation215": {
+    "a": "220 p.",
+    "c": "",
+    "d": "24 cm"
+  },
+  "collection": "Collection un ; Collection deux",
+  "resume": "Résumé sur\ndeux lignes.",
+  "tableDesMatieres": "Chapitre 1 ; Chapitre 2",
+  "auteurPrincipal": "Martin Paul 070123456 070",
+  "autresAuteurs": "Durand Anne 12345678X ; Petit Luc",
+  "auteursSecondaires": "Moreau Claire 340",
+  "auteurPrincipalCollectivite": "Insee 026927438",
+  "autreAuteurPrincipalCollectivite": "Congrès Paris",
+  "auteurSecondaireCollectivite": "Éditions A ; Éditions B",
+  "vedetteNomCommun": "Statistique Méthodes 20e siècle France rameau; Économie rameau",
+  "vedetteGeo": "France Histoire rameau",
+  "vedetteFormeGenre": "Annuaire rameau",
+  "vedettePersonne": "Dupont Jean 1900-1980",
+  "vedetteCollectivite": "Insee Direction générale",
+  "notes": "Première note ; Seconde note"
+}

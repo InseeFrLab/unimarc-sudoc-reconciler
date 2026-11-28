@@ -1,0 +1,247 @@
+{
+  "countCatA": 1,
+  "countCatB": 2,
+  "notices": [
+    {
+      "ppn": "267670346",
+      "titre": "Les comptes de la nation : édition 2022",
+      "identifiant": "SYR-001",
+      "categorie": "A",
+      "syracuse": {
+        "Identifiant": "SYR-001",
+        "Identifiant d'origine": "267670346",
+        "Filtre": "SUDOC",
+        "Titre": "Les comptes de la nation : édition 2022",
+        "Auteur principal - Personne physique": "Ledoux, Pierre (1932-2011) 026927438",
+        "Editeur": "INSEE",
+        "Publié le": "C 2022",
+        "ISBN": "9782111380808",
+        "EAN": "",
+        "Description matérielle": "1 vol. (151 p.) Tableaux 22 cm",
+        "Résumé": "",
+        "Vedette matière - Nom commun": "Comptabilité nationale France rameau",
+        "Tome": "2",
+        "Nombre d'exemplaires": "3"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "SYR-001",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "267670346",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Filtre",
+          "value": "SUDOC",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Les comptes de la nation : édition 2022",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Auteur principal - Personne physique",
+          "value": "Ledoux, Pierre (1932-2011) 026927438",
+          "rank": "5",
+          "referentialType": "Autorité",
+          "referentialName": "Personnes"
+        },
+        {
+          "name": "Editeur",
+          "value": "INSEE",
+          "rank": "6",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Publié le",
+          "value": "C 2022",
+          "rank": "7",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "ISBN",
+          "value": "9782111380808",
+          "rank": "8",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "EAN",
+          "value": "",
+          "rank": "9",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Description matérielle",
+          "value": "1 vol. (151 p.) Tableaux 22 cm",
+          "rank": "10",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Résumé",
+          "value": "",
+          "rank": "11",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Vedette matière - Nom commun",
+          "value": "Comptabilité nationale France rameau",
+          "rank": "12",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Tome",
+          "value": "2",
+          "rank": "13",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Nombre d'exemplaires",
+          "value": "3",
+          "rank": "14",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    },
+    {
+      "ppn": "65493583",
+      "titre": "La comptabilité des entreprises en France",
+      "identifiant": "SYR-002",
+      "categorie": "B",
+      "syracuse": {
+        "Identifiant": "SYR-002",
+        "Identifiant d'origine": "65493583",
+        "Filtre": "PMB.BIB",
+        "Titre": "La comptabilité des entreprises en France",
+        "Auteur principal - Personne physique": "Martin, Paul",
+        "Publié le": "1965"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "SYR-002",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "65493583",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Filtre",
+          "value": "PMB.BIB",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "La comptabilité des entreprises en France",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Auteur principal - Personne physique",
+          "value": "Martin, Paul",
+          "rank": "5",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Publié le",
+          "value": "1965",
+          "rank": "6",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    },
+    {
+      "ppn": "123456",
+      "titre": "Le recensement de la population de 1954",
+      "identifiant": "SYR-003",
+      "categorie": "B",
+      "syracuse": {
+        "Identifiant": "SYR-003",
+        "Identifiant d'origine": "123456",
+        "Filtre": "PMB.BIB",
+        "Titre": "Le recensement de la population de 1954",
+        "Publié le": "1956",
+        "Auteur principal - Collectivité": "Institut national de la statistique"
+      },
+      "itemType": "GESMARC",
+      "properties": [
+        {
+          "name": "Identifiant",
+          "value": "SYR-003",
+          "rank": "1",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Identifiant d'origine",
+          "value": "123456",
+          "rank": "2",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Filtre",
+          "value": "PMB.BIB",
+          "rank": "3",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Titre",
+          "value": "Le recensement de la population de 1954",
+          "rank": "4",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Publié le",
+          "value": "1956",
+          "rank": "5",
+          "referentialType": "",
+          "referentialName": ""
+        },
+        {
+          "name": "Auteur principal - Collectivité",
+          "value": "Institut national de la statistique",
+          "rank": "6",
+          "referentialType": "",
+          "referentialName": ""
+        }
+      ]
+    }
+  ]
+}

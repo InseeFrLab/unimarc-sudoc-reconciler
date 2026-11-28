@@ -1,0 +1,252 @@
+[
+  {
+    "a": "",
+    "b": "",
+    "score": 1
+  },
+  {
+    "a": "a",
+    "b": "a",
+    "score": 1
+  },
+  {
+    "a": "a",
+    "b": "b",
+    "score": 0
+  },
+  {
+    "a": "",
+    "b": "abc",
+    "score": 0
+  },
+  {
+    "a": "abc",
+    "b": "",
+    "score": 0
+  },
+  {
+    "a": "ab",
+    "b": "ab",
+    "score": 1
+  },
+  {
+    "a": "ab",
+    "b": "ba",
+    "score": 0
+  },
+  {
+    "a": "ab",
+    "b": "abc",
+    "score": 0.6666666666666666
+  },
+  {
+    "a": " ",
+    "b": "",
+    "score": 1
+  },
+  {
+    "a": "  ",
+    "b": "   ",
+    "score": 1
+  },
+  {
+    "a": "a b",
+    "b": "ab",
+    "score": 1
+  },
+  {
+    "a": "les comptes",
+    "b": "lescomptes",
+    "score": 1
+  },
+  {
+    "a": "les   comptes",
+    "b": "les comptes",
+    "score": 1
+  },
+  {
+    "a": "les\tcomptes",
+    "b": "les comptes",
+    "score": 1
+  },
+  {
+    "a": "les\ncomptes",
+    "b": "les comptes",
+    "score": 1
+  },
+  {
+    "a": "les comptes",
+    "b": "les comptes",
+    "score": 1
+  },
+  {
+    "a": "les﻿comptes",
+    "b": "lescomptes",
+    "score": 1
+  },
+  {
+    "a": "les\u001fcomptes",
+    "b": "lescomptes",
+    "score": 0.8421052631578947
+  },
+  {
+    "a": "aaaa",
+    "b": "aa",
+    "score": 0.5
+  },
+  {
+    "a": "aaaa",
+    "b": "aaaa",
+    "score": 1
+  },
+  {
+    "a": "aaaa",
+    "b": "aaa",
+    "score": 0.8
+  },
+  {
+    "a": "abab",
+    "b": "ab",
+    "score": 0.5
+  },
+  {
+    "a": "abababab",
+    "b": "baba",
+    "score": 0.6
+  },
+  {
+    "a": "night",
+    "b": "nacht",
+    "score": 0.25
+  },
+  {
+    "a": "Insee",
+    "b": "insee",
+    "score": 0.75
+  },
+  {
+    "a": "économie",
+    "b": "economie",
+    "score": 0.8571428571428571
+  },
+  {
+    "a": "économie",
+    "b": "économie",
+    "score": 1
+  },
+  {
+    "a": "l’économie",
+    "b": "l'économie",
+    "score": 0.7777777777777778
+  },
+  {
+    "a": "a;b",
+    "b": "a:b",
+    "score": 0
+  },
+  {
+    "a": "hello, world!",
+    "b": "hello world",
+    "score": 0.8
+  },
+  {
+    "a": "france",
+    "b": "french",
+    "score": 0.4
+  },
+  {
+    "a": "healed",
+    "b": "sealed",
+    "score": 0.8
+  },
+  {
+    "a": "edward",
+    "b": "edwards",
+    "score": 0.9090909090909091
+  },
+  {
+    "a": "Olive-green table for sale in extremely good condition.",
+    "b": "For sale: table in very good  condition, olive green in colour.",
+    "score": 0.6326530612244898
+  },
+  {
+    "a": "Les comptes de la nation",
+    "b": "Les comptes de la nation 2022",
+    "score": 0.9047619047619048
+  },
+  {
+    "a": "Le recensement de la population de 1954",
+    "b": "Le recensement de la population de 1955",
+    "score": 0.96875
+  },
+  {
+    "a": "Statistiques agricoles",
+    "b": "Comptes nationaux",
+    "score": 0.17142857142857143
+  },
+  {
+    "a": "Gallimard",
+    "b": "Gallimard Jeunesse",
+    "score": 0.6666666666666666
+  },
+  {
+    "a": "Dunod",
+    "b": "Hachette",
+    "score": 0
+  },
+  {
+    "a": "😀😀",
+    "b": "😀😁",
+    "score": 0.6666666666666666
+  },
+  {
+    "a": "😀",
+    "b": "😀",
+    "score": 1
+  },
+  {
+    "a": "😀",
+    "b": "😁",
+    "score": 0
+  },
+  {
+    "a": "a😀b",
+    "b": "a😁b",
+    "score": 0.3333333333333333
+  },
+  {
+    "a": "日本語の本",
+    "b": "日本語の書",
+    "score": 0.75
+  },
+  {
+    "a": "abcdefghij",
+    "b": "abcdefghijkl",
+    "score": 0.9
+  },
+  {
+    "a": "abcdefghij",
+    "b": "abcdefghijk",
+    "score": 0.9473684210526315
+  },
+  {
+    "a": "abcdefghijklmnopqrst",
+    "b": "abcdefghijklmnopqruvwx",
+    "score": 0.85
+  },
+  {
+    "a": "abcdefghijklmnopqrst",
+    "b": "abcdefghijklmnopqruvw",
+    "score": 0.8717948717948718
+  },
+  {
+    "a": "abcdefghijk",
+    "b": "abcdeflmnop",
+    "score": 0.5
+  },
+  {
+    "a": "abcdefghijk",
+    "b": "abcdefglmnop",
+    "score": 0.5714285714285714
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "titre": "Les comptes de la nation édition 2022",
+  "isbn": "978-2-11-138080-8",
+  "prix": "22 EUR",
+  "reliure": "broché",
+  "ean": "9782111380808",
+  "eanGenerated": true,
+  "hasTypeSupport": false,
+  "editeur": "Insee",
+  "annee": "2022",
+  "descriptionMaterielle": "1 volume (151 pages) ill. 22 cm",
+  "collation215": {
+    "a": "1 vol. (151 p.)",
+    "c": "ill.",
+    "d": "22 cm"
+  },
+  "collection": "Insee références",
+  "resume": "Synthèse annuelle des comptes nationaux.",
+  "tableDesMatieres": "",
+  "auteurPrincipal": "Ledoux Pierre 1932-2011 026927438 070",
+  "autresAuteurs": "",
+  "auteursSecondaires": "",
+  "auteurPrincipalCollectivite": "",
+  "autreAuteurPrincipalCollectivite": "",
+  "auteurSecondaireCollectivite": "",
+  "vedetteNomCommun": "Comptabilité nationale France rameau",
+  "vedetteGeo": "",
+  "vedetteFormeGenre": "",
+  "vedettePersonne": "",
+  "vedetteCollectivite": "",
+  "notes": ""
+}
